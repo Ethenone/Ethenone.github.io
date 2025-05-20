@@ -1,20 +1,14 @@
-[![XX](https://img.shields.io/badge/XX-github-blue?logo=github)](https://github.com/ethenone)
+[![ethenone](https://img.shields.io/badge/ethenone-github-blue?logo=github)](https://github.com/ethenone)
 
-I'm currently pursuing a Master's degree in XX at the Department of XX, XX University, XX.
+I'm going to pursuing a Master's degree in Biology at the Department of Biomedical Engineering, Shanghai Jiao Tong University, Shanghai.
 
 #### Email  
 <code>2404794221@qq.com</code>  
-<code>XX@XX.XX</code>
+<code>ethenone@sjtu.edu.cn</code>
 
 #### Education  
-**XX University**, Master of XX (XX – XX)  
-• GPA: XX/XX  
-
-**XX University**, Exchange student <br>  
-• As a XX, represented my college as an outstanding student for a XX exchange program.  
-
-**XX University**, Honours Bachelor of XX (XX – XX)  
-• GPA: XX/XX (top XX%)  
+**Shanghai Jiao Tong University**, Bachelor of Engineering (2021.9 – 2025.6)  
+• GPA: 3.72/4.3
 
 #### Research Interests  
-XX, XX, XX, XX.
+Biology, Bioinformatics, Biomedical Engineering
