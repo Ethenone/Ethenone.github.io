@@ -2,13 +2,18 @@
 
 I'm going to pursuing a Master's degree in Biology at the Department of Biomedical Engineering, Shanghai Jiao Tong University, Shanghai.
 
-#### Email  
+#### Email
+
 <code>2404794221@qq.com</code>  
 <code>ethenone@sjtu.edu.cn</code>
 
-#### Education  
-**Shanghai Jiao Tong University**, Bachelor of Engineering (2021.9 – 2025.6)  
+#### Education
+
+**Guangdong Experimental High School**, Guangzhou (2018.9-2021.6)
+
+**Shanghai Jiao Tong University**, Shanghai, Bachelor of Engineering (2021.9 – 2025.6)  
 • GPA: 3.72/4.3
 
-#### Research Interests  
+#### Research Interests
+
 Biology, Bioinformatics, Biomedical Engineering
