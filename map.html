@@ -166,17 +166,19 @@
     </section>
     <!-- Top Section -->
     <header>
-        <h1>🗺️ 多种地图展示方式切换</h1>
+        <h1>🗺️ 我的旅行地图</h1>
     </header>
     <<div class="button-group">
         <button onclick="showMap('map1')">连线图</button>
         <button onclick="showMap('map2')">轨迹图(火车)</button>
+        <button onclick="showMap('map3')">轨迹图(骑行)</button>
     </div>
 
-    <div>
-        <iframe id="map1" class="map-frame active" src="map/map_line.html"></iframe>
-        <iframe id="map2" class="map-frame" src="map/map_rail.html"></iframe>
-    </div>
+     <div>
+         <iframe id="map1" class="map-frame active" src="map/map_line.html"></iframe>
+         <iframe id="map2" class="map-frame" src="map/map_rail.html"></iframe>
+         <iframe id="map3" class="map-frame" src="map/map_with_polyline_cityselect.html"></iframe>
+     </div>
 
     <script>
         function showMap(mapId) {
