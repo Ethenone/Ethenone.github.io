@@ -172,12 +172,14 @@
         <button onclick="showMap('map1')">连线图</button>
         <button onclick="showMap('map2')">轨迹图(火车)</button>
         <button onclick="showMap('map3')">轨迹图(骑行)</button>
+        <button onclick="showMap('map4')">制县等级图</button>
     </div>
 
      <div>
          <iframe id="map1" class="map-frame active" src="map/map_line.html"></iframe>
          <iframe id="map2" class="map-frame" src="map/map_rail.html"></iframe>
          <iframe id="map3" class="map-frame" src="map/map_with_polyline_cityselect.html"></iframe>
+         <iframe id="map4" class="map-frame" src="map/map_city.html"></iframe>
      </div>
 
     <script>
@@ -189,6 +191,19 @@
             document.getElementById(mapId).classList.add('active');
         }
     </script>
+
+    <!-- Footer-->
+    <footer class="bg-bottom text-center py-5">
+        <div class="container px-5">
+            <div class="text-white-50 small">
+                <div id="copyright-text" class="mb-2"></div>
+                <a id="github-link" href="https://github.com/Ethenone">Github</a>
+                <span class="mx-1">&middot;</span>
+                <a id="license-link"
+                   href="https://github.com/Ethenone/Ethenone.github.io/blob/master/LICENSE">License</a>
+            </div>
+        </div>
+    </footer>
 
 </body>
 </html>
