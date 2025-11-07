@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta name="description" content="Academic Webpage" />
     <meta name="author" content="Tianci Wang" />
-    <title>交互地图切换</title>
+    <title>My Travel Map</title>
     <style>
         body {
             font-family: "Helvetica Neue", Arial, sans-serif;
@@ -166,20 +166,22 @@
     </section>
     <!-- Top Section -->
     <header>
-        <h1>🗺️ 我的旅行地图</h1>
+        <h1>🗺️ My Travel Map</h1>
     </header>
     <<div class="button-group">
-        <button onclick="showMap('map1')">连线图</button>
-        <button onclick="showMap('map2')">轨迹图(火车)</button>
-        <button onclick="showMap('map3')">轨迹图(骑行)</button>
-        <button onclick="showMap('map4')">制县等级图</button>
+        <button onclick="showMap('map1')">Straight-line map (airplane,train)</button>
+        <button onclick="showMap('map2')">Route map (train)</button>
+        <button onclick="showMap('map3')">Route map (cycling)</button>
+        <button onclick="showMap('map4')">Straight-line map (cycling)</button>
+        <button onclick="showMap('map5')">Chinese city level</button>
     </div>
 
      <div>
          <iframe id="map1" class="map-frame active" src="map/map_line.html"></iframe>
          <iframe id="map2" class="map-frame" src="map/map_rail.html"></iframe>
          <iframe id="map3" class="map-frame" src="map/map_with_polyline_cityselect.html"></iframe>
-         <iframe id="map4" class="map-frame" src="map/map_city.html"></iframe>
+         <iframe id="map4" class="map-frame" src="map/straight-line.html"></iframe>
+         <iframe id="map5" class="map-frame" src="map/map_city.html"></iframe>
      </div>
 
     <script>

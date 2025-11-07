@@ -98,7 +98,7 @@ selectlist = """"""
 locationlist = """initial: [0,0,1]"""
 for name,en,lat,lon,zoom in citylist:
     selectlist = selectlist + f"""
-    <option value="{en}">{name}:{round(citysum[name]/1000,2)}km</option>"""
+    <option value="{en}">{name}({en}):{round(citysum[name]/1000,2)}km</option>"""
     
     locationlist = locationlist + f""",
     {en}:[{lat},{lon},{zoom}]"""
@@ -119,7 +119,7 @@ custom_html = f"""
 </style>
 
 <select id="city-select">
-    <option value="">🌍 我曾在这些城市留下痕迹</option>
+    <option value="">🌍 I have left traces in these cities.</option>
     {selectlist}  
 </select>
 
@@ -141,3 +141,66 @@ custom_html = f"""
 """
 m.get_root().html.add_child(Element(custom_html))
 m.save(f'{output}//map_with_polyline_cityselect.html')
+
+
+#起点-终点连线
+m = folium.Map(location=[31.03003, 121.44],
+               zoom_start=15,
+               control_scale=True,
+               control=False,
+               tiles=None
+              )
+
+folium.TileLayer(tiles='http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+                 attr="&copy; <a href='https://stadiamaps.com/' target='_blank'>Stadia Maps</a> &copy; <a href='https://openmaptiles.org/' target='_blank'>OpenMapTiles</a> &copy; <a href='https://www.openstreetmap.org/copyright' target='_blank'>OpenStreetMap</a>&copy; <a href='https://stamen.com/' target='_blank'>Stamen Design</a>",
+                 min_zoom=0,
+                 max_zoom=19,
+                 control=True,
+                 show=True,
+                 overlay=False,
+                 name='straight-line map'
+                ).add_to(m)
+
+group_conn = folium.FeatureGroup(name = 'straight-line')
+group_start = folium.FeatureGroup(name = 'origin',show=False)
+group_start_heatmap = folium.FeatureGroup(name = 'origin heatmap',show=False)
+group_end = folium.FeatureGroup(name = 'destination',show=False)
+group_end_heatmap = folium.FeatureGroup(name = 'destination heatmap',show=False)
+start = []
+end = []
+for i in data:
+    if not i['summary_polyline']:
+        continue
+    pl = polyline.decode(i['summary_polyline'])
+    pl = transfer(pl)
+    folium.PolyLine(
+        locations = [pl[0],pl[-1]],
+        color = 'blue',
+        weight=3,
+        opacity=0.2
+    ).add_to(group_conn)
+    folium.Circle(
+        location=pl[0],
+        radius=30,   # 圆的半径
+        color='red', #'#FF1493',
+        fill=True,
+        fill_color='red'
+    ).add_to(group_start)
+    folium.Circle(
+        location=pl[-1],
+        radius=30,   # 圆的半径
+        color='green', #'#FF1493',
+        fill=True,
+        fill_color='green'
+    ).add_to(group_end)
+    start.append(pl[0])
+    end.append(pl[-1])
+plugins.HeatMap(start,radius=15).add_to(group_start_heatmap)
+plugins.HeatMap(end,radius=15).add_to(group_end_heatmap)
+group_end.add_to(m)
+group_start.add_to(m)
+group_end_heatmap.add_to(m)
+group_start_heatmap.add_to(m)
+group_conn.add_to(m)
+folium.LayerControl(collapsed=False).add_to(m)
+m.save(f'{output}//straight-line.html')
