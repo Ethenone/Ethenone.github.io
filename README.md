@@ -10,6 +10,7 @@ index.html
 
 --- map/map_with_polyline_cityselect.html
 
---- map/map_city.html
+--- map/straight-line.html
 
+--- map/map_city.html
 
