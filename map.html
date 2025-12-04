@@ -177,22 +177,324 @@
         <button onclick="showMap('map6')">Shanghai exploration</button>
     </div>
 
-     <div>
-         <iframe id="map1" class="map-frame active" src="map/map_line.html"></iframe>
-         <iframe id="map2" class="map-frame" src="map/map_rail.html"></iframe>
-         <iframe id="map3" class="map-frame" src="map/map_with_polyline_cityselect.html"></iframe>
-         <iframe id="map4" class="map-frame" src="map/straight-line.html"></iframe>
-         <iframe id="map5" class="map-frame" src="map/map_city.html"></iframe>
-         <iframe id="map6" class="map-frame" src="map/map_shanghai.html"></iframe>
-     </div>
+    <div>
+        <iframe id="map1" class="map-frame active" src="map/map_line.html"></iframe>
+        <iframe id="map2" class="map-frame" src="map/map_rail.html"></iframe>
+        <iframe id="map3" class="map-frame" src="map/map_with_polyline_cityselect.html"></iframe>
+        <iframe id="map4" class="map-frame" src="map/straight-line.html"></iframe>
+        <iframe id="map5" class="map-frame" src="map/map_city.html"></iframe>
+        <iframe id="map6" class="map-frame" src="map/map_shanghai.html"></iframe>
+    </div>
+
+    <div id="train-stats" style="display:none;">
+        <div id="stats-container"
+             style="width:95%;margin:20px auto;padding:25px;background:white;border-radius:16px;
+         box-shadow:0 4px 14px rgba(0,0,0,.12);">
+
+            <h2 style="margin-bottom:20px;">🚆 我的列车统计</h2>
+
+            <div id="stats-basic" style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+                <!-- 自动填入 -->
+            </div>
+
+            <h3 style="margin-top:30px;">📊 数据可视化</h3>
+            <canvas id="histogramChart" style="margin-top:30px;"></canvas>
+            <canvas id="departChart" style="margin-top:20px;"></canvas>
+            <canvas id="arriveChart" style="margin-top:20px;"></canvas>
+        </div>
+    </div>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.4.0"></script>
+
 
     <script>
+        let chartInstances = [];
+
         function showMap(mapId) {
             const maps = document.getElementsByClassName('map-frame');
-            for (let i = 0; i < maps.length; i++) {
-                maps[i].classList.remove('active');
-            }
+            for (let i = 0; i < maps.length; i++) maps[i].classList.remove('active');
             document.getElementById(mapId).classList.add('active');
+
+            const stats = document.getElementById('train-stats');
+
+            if (mapId === "map2") {
+                stats.style.display = "block";
+                loadStats();
+                drawDepartChart();
+                drawArriveChart();
+            } else {
+                stats.style.display = "none";
+            }
+        }
+
+        async function loadStats() {
+            const statsData = await (await fetch("data/stats.json")).json();
+            const chartsData = await (await fetch("data/charts.json")).json();
+
+            fillBasicStats(statsData);
+            drawHistogram(chartsData.durations);
+
+
+        }
+
+        function fillBasicStats(data) {
+            document.getElementById("stats-basic").innerHTML = `
+                <div>📌 <b>总乘坐次数：</b> ${data.total_trips}</div>
+                <div>⏱️ <b>总乘坐时长：</b> ${data.total_time}</div>
+                <div>🏆 <b>最长乘坐：</b> ${data.longest_trip.train} ${data.longest_trip.from}→${data.longest_trip.to}（${data.longest_trip.duration}）</div>
+                <div>⚡ <b>最短乘坐：</b> ${data.shortest_trip.train} ${data.shortest_trip.from}→${data.shortest_trip.to}（${data.shortest_trip.duration}）</div>
+                <div>🌟 <b>30min内短途：</b> ${data.short_trips}</div>
+                <div>🌙 <b>跨天车：</b> ${data.overnight_trips}</div>
+            `;
+        }
+
+        async function drawDepartChart() {
+            const chartsData = await (await fetch("data/charts.json")).json();
+
+            const hours = chartsData.depart_hours;  // 整数小时分布用
+
+            // -------------------------
+            // 1. 转换外部给定最早/最晚时间（含分钟）
+            // -------------------------
+            function convertHMToFloat(hm) {
+                const [h, m] = hm.split(":").map(Number);
+                return h + m / 60 - 0.5;
+            }
+
+            const earliestFloat = convertHMToFloat(chartsData.earliestdep.time);
+            const latestFloat = convertHMToFloat(chartsData.latestdep.time);
+
+            // -------------------------
+            // 2. 整点小时分布 bins (0~23)
+           // --------------------------
+            const bins = new Array(24).fill(0);
+            hours.forEach(h => {
+                if (h >= 0 && h < 24) bins[h]++;
+            });
+
+            // -------------------------
+            // 3. 绘图
+            // -------------------------
+            const ctx = document.getElementById("departChart").getContext("2d");
+
+            if (window.departChart instanceof Chart) {
+                window.departChart.destroy();
+            }
+
+            window.departChart = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: [...Array(24).keys()],  // 0~23
+                    datasets: [{
+                        label: "出发次数",
+                        data: bins
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            title: { display: true, text: "出发时间" },
+                            min: 0,
+                            max: 23
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: "次数" }
+                        }
+                    },
+                    plugins: {
+                        annotation: {
+                            annotations: {
+                                earliestLine: {
+                                    type: "line",
+                                    borderColor: "blue",
+                                    borderWidth: 2,
+                                    value: earliestFloat,
+                                    scaleID: "x",
+                                    label: {
+                                        content: [
+                                            `最早：${chartsData.earliestdep.time}`,
+                                            `车次：${chartsData.earliestdep.train}`,
+                                            `出发站：${chartsData.earliestdep.from}`,
+                                            `到达站：${chartsData.earliestdep.to}`
+                                        ],
+                                        enabled: true,
+                                        position: "start"
+                                    }
+                                },
+                                latestLine: {
+                                    type: "line",
+                                    borderColor: "red",
+                                    borderWidth: 2,
+                                    value: latestFloat,
+                                    scaleID: "x",
+                                    label: {
+                                        content: [
+                                            `最早：${chartsData.latestdep.time}`,
+                                            `车次：${chartsData.latestdep.train}`,
+                                            `出发站：${chartsData.latestdep.from}`,
+                                            `到达站：${chartsData.latestdep.to}`
+                                        ],
+                                        enabled: true,
+                                        position: "start"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function drawArriveChart() {
+            const chartsData = await (await fetch("data/charts.json")).json();
+
+            const hours = chartsData.arrive_hours;  // 整数小时分布用
+
+            // -------------------------
+            // 1. 转换外部给定最早/最晚时间（含分钟）
+            // -------------------------
+            function convertHMToFloat(hm) {
+                const [h, m] = hm.split(":").map(Number);
+                return h + m / 60 - 0.5;
+            }
+
+            const earliestFloat = convertHMToFloat(chartsData.earliestarr.time);
+            const latestFloat = convertHMToFloat(chartsData.latestarr.time);
+
+            // -------------------------
+            // 2. 整点小时分布 bins (0~23)
+            // --------------------------
+            const bins = new Array(24).fill(0);
+            hours.forEach(h => {
+                if (h >= 0 && h < 24) bins[h]++;
+            });
+
+            // -------------------------
+            // 3. 绘图
+            // -------------------------
+            const ctx = document.getElementById("arriveChart").getContext("2d");
+
+            if (window.arriveChart instanceof Chart) {
+                window.arriveChart.destroy();
+            }
+
+            window.arriveChart = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: [...Array(24).keys()],  // 0~23
+                    datasets: [{
+                        label: "到达次数",
+                        data: bins
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            title: { display: true, text: "到达时间" },
+                            min: 0,
+                            max: 23
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: "次数" }
+                        }
+                    },
+                    plugins: {
+                        annotation: {
+                            annotations: {
+                                earliestLine: {
+                                    type: "line",
+                                    borderColor: "blue",
+                                    borderWidth: 2,
+                                    value: earliestFloat,
+                                    scaleID: "x",
+                                    label: {
+                                        content: [
+                                            `最早：${chartsData.earliestarr.time}`,
+                                            `车次：${chartsData.earliestarr.train}`,
+                                            `出发站：${chartsData.earliestarr.from}`,
+                                            `到达站：${chartsData.earliestarr.to}`
+                                        ],
+                                        enabled: true,
+                                        position: "start"
+                                    }
+                                },
+                                latestLine: {
+                                    type: "line",
+                                    borderColor: "red",
+                                    borderWidth: 2,
+                                    value: latestFloat,
+                                    scaleID: "x",
+                                    label: {
+                                        content: [
+                                            `最早：${chartsData.latestarr.time}`,
+                                            `车次：${chartsData.latestarr.train}`,
+                                            `出发站：${chartsData.latestarr.from}`,
+                                            `到达站：${chartsData.latestarr.to}`
+                                        ],
+                                        enabled: true,
+                                        position: "start"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function drawHistogram(durations) {
+            // 1. 初始化 bins（0~600 每 30 一箱，总共 21 个箱）
+            const binSize = 30;
+            const maxBin = 600;
+            const bins = new Array(maxBin / binSize + 1).fill(0); // 600/30=20→21个bin
+
+            // 2. 填充数据
+            durations.forEach(d => {
+                if (d >= maxBin) {
+                    bins[bins.length - 1]++;    // 溢出箱
+                } else {
+                    const index = Math.floor(d / binSize);
+                    bins[index]++;
+                }
+            });
+
+            // 3. 构建 x 轴区间标签，例如 "0-30" "30-60" ... "570–600" "600+"
+            const labels = [];
+            for (let i = 0; i < bins.length - 1; i++) {
+                labels.push(`${i * binSize}-${(i + 1) * binSize}`);
+            }
+            labels.push("600+");
+
+            // 4. 绘图
+            const ctx = document.getElementById("histogramChart").getContext("2d");
+
+            if (window.histChart) window.histChart.destroy();
+
+            window.histChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "乘坐时长分布（分钟）",
+                        data: bins,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: { title: { display: true, text: "时长区间（分钟）" } },
+                        y: { title: { display: true, text: "次数" }, beginAtZero: true }
+                    }
+                }
+            });
         }
     </script>
 
