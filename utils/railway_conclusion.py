@@ -38,9 +38,9 @@ stats['longest_trip'] = {'train':timemax['车次'],
 timemin = data.loc[data['时长.1'].idxmin()]
 hour,minute = divmod(timemin['时长.1'],60)
 
-stats['shortest_trip'] = {'train':timemax['车次'],
-                        'from':timemax['上车站'],
-                        'to':timemax['下车站'],
+stats['shortest_trip'] = {'train':timemin['车次'],
+                        'from':timemin['上车站'],
+                        'to':timemin['下车站'],
                         'duration':f'{int(hour)}h{int(minute)}min'}
 
 

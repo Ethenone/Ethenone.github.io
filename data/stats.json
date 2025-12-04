@@ -1,1 +1,1 @@
-{"total_trips": 154, "total_time": "566h38min", "longest_trip": {"train": "Z201", "from": "北京西", "to": "广州", "duration": "21h59min"}, "shortest_trip": {"train": "Z201", "from": "北京西", "to": "广州", "duration": "0h10min"}, "short_trips": 44, "overnight_trips": 24}
+{"total_trips": 154, "total_time": "566h38min", "longest_trip": {"train": "Z201", "from": "北京西", "to": "广州", "duration": "21h59min"}, "shortest_trip": {"train": "G606", "from": "太原南", "to": "太原", "duration": "0h10min"}, "short_trips": 44, "overnight_trips": 24}

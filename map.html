@@ -191,13 +191,13 @@
              style="width:95%;margin:20px auto;padding:25px;background:white;border-radius:16px;
          box-shadow:0 4px 14px rgba(0,0,0,.12);">
 
-            <h2 style="margin-bottom:20px;">🚆 我的列车统计</h2>
+            <h2 style="margin-bottom:20px;">🚆 Statistics of My Train Ride Records</h2>
 
             <div id="stats-basic" style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
                 <!-- 自动填入 -->
             </div>
 
-            <h3 style="margin-top:30px;">📊 数据可视化</h3>
+            <h3 style="margin-top:30px;">📊 Visualization</h3>
             <canvas id="histogramChart" style="margin-top:30px;"></canvas>
             <canvas id="departChart" style="margin-top:20px;"></canvas>
             <canvas id="arriveChart" style="margin-top:20px;"></canvas>
@@ -242,12 +242,12 @@
 
         function fillBasicStats(data) {
             document.getElementById("stats-basic").innerHTML = `
-                <div>📌 <b>总乘坐次数：</b> ${data.total_trips}</div>
-                <div>⏱️ <b>总乘坐时长：</b> ${data.total_time}</div>
-                <div>🏆 <b>最长乘坐：</b> ${data.longest_trip.train} ${data.longest_trip.from}→${data.longest_trip.to}（${data.longest_trip.duration}）</div>
-                <div>⚡ <b>最短乘坐：</b> ${data.shortest_trip.train} ${data.shortest_trip.from}→${data.shortest_trip.to}（${data.shortest_trip.duration}）</div>
-                <div>🌟 <b>30min内短途：</b> ${data.short_trips}</div>
-                <div>🌙 <b>跨天车：</b> ${data.overnight_trips}</div>
+                <div>📌 <b>Total Trips：</b> ${data.total_trips}</div>
+                <div>⏱️ <b>Total Trips：</b> ${data.total_time}</div>
+                <div>🏆 <b>Longest Trip:</b> ${data.longest_trip.train} ${data.longest_trip.from}→${data.longest_trip.to}（${data.longest_trip.duration}）</div>
+                <div>⚡ <b>Shortest Trip:</b> ${data.shortest_trip.train} ${data.shortest_trip.from}→${data.shortest_trip.to}（${data.shortest_trip.duration}）</div>
+                <div>🌟 <b>Short Trips (≤30 mins):</b> ${data.short_trips}</div>
+                <div>🌙 <b>Overnight Trips:</b> ${data.overnight_trips}</div>
             `;
         }
 
@@ -289,7 +289,7 @@
                 data: {
                     labels: [...Array(24).keys()],  // 0~23
                     datasets: [{
-                        label: "出发次数",
+                        label: "Departure Count",
                         data: bins
                     }]
                 },
@@ -297,13 +297,13 @@
                     responsive: true,
                     scales: {
                         x: {
-                            title: { display: true, text: "出发时间" },
+                            title: { display: true, text: "Departure Time" },
                             min: 0,
                             max: 23
                         },
                         y: {
                             beginAtZero: true,
-                            title: { display: true, text: "次数" }
+                            title: { display: true, text: "Count" }
                         }
                     },
                     plugins: {
@@ -317,10 +317,10 @@
                                     scaleID: "x",
                                     label: {
                                         content: [
-                                            `最早：${chartsData.earliestdep.time}`,
-                                            `车次：${chartsData.earliestdep.train}`,
-                                            `出发站：${chartsData.earliestdep.from}`,
-                                            `到达站：${chartsData.earliestdep.to}`
+                                            `Earliest：${chartsData.earliestdep.time}`,
+                                            `Train：${chartsData.earliestdep.train}`,
+                                            `From：${chartsData.earliestdep.from}`,
+                                            `To：${chartsData.earliestdep.to}`
                                         ],
                                         enabled: true,
                                         position: "start"
@@ -334,10 +334,10 @@
                                     scaleID: "x",
                                     label: {
                                         content: [
-                                            `最早：${chartsData.latestdep.time}`,
-                                            `车次：${chartsData.latestdep.train}`,
-                                            `出发站：${chartsData.latestdep.from}`,
-                                            `到达站：${chartsData.latestdep.to}`
+                                            `Latest：${chartsData.latestdep.time}`,
+                                            `Train：${chartsData.latestdep.train}`,
+                                            `From：${chartsData.latestdep.from}`,
+                                            `To：${chartsData.latestdep.to}`
                                         ],
                                         enabled: true,
                                         position: "start"
@@ -388,7 +388,7 @@
                 data: {
                     labels: [...Array(24).keys()],  // 0~23
                     datasets: [{
-                        label: "到达次数",
+                        label: "Arrival Count",
                         data: bins
                     }]
                 },
@@ -396,13 +396,13 @@
                     responsive: true,
                     scales: {
                         x: {
-                            title: { display: true, text: "到达时间" },
+                            title: { display: true, text: "Arrival Time" },
                             min: 0,
                             max: 23
                         },
                         y: {
                             beginAtZero: true,
-                            title: { display: true, text: "次数" }
+                            title: { display: true, text: "Count" }
                         }
                     },
                     plugins: {
@@ -416,10 +416,10 @@
                                     scaleID: "x",
                                     label: {
                                         content: [
-                                            `最早：${chartsData.earliestarr.time}`,
-                                            `车次：${chartsData.earliestarr.train}`,
-                                            `出发站：${chartsData.earliestarr.from}`,
-                                            `到达站：${chartsData.earliestarr.to}`
+                                            `Earliest：${chartsData.earliestarr.time}`,
+                                            `Train：${chartsData.earliestarr.train}`,
+                                            `From：${chartsData.earliestarr.from}`,
+                                            `To：${chartsData.earliestarr.to}`
                                         ],
                                         enabled: true,
                                         position: "start"
@@ -433,10 +433,10 @@
                                     scaleID: "x",
                                     label: {
                                         content: [
-                                            `最早：${chartsData.latestarr.time}`,
-                                            `车次：${chartsData.latestarr.train}`,
-                                            `出发站：${chartsData.latestarr.from}`,
-                                            `到达站：${chartsData.latestarr.to}`
+                                            `Latest：${chartsData.latestarr.time}`,
+                                            `Train：${chartsData.latestarr.train}`,
+                                            `From：${chartsData.latestarr.from}`,
+                                            `To：${chartsData.latestarr.to}`
                                         ],
                                         enabled: true,
                                         position: "start"
@@ -482,7 +482,7 @@
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: "乘坐时长分布（分钟）",
+                        label: "Distribution of Travel Duration",
                         data: bins,
                         borderWidth: 1
                     }]
@@ -490,8 +490,8 @@
                 options: {
                     responsive: true,
                     scales: {
-                        x: { title: { display: true, text: "时长区间（分钟）" } },
-                        y: { title: { display: true, text: "次数" }, beginAtZero: true }
+                        x: { title: { display: true, text: "Time (min)" } },
+                        y: { title: { display: true, text: "Count" }, beginAtZero: true }
                     }
                 }
             });
