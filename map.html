@@ -63,6 +63,73 @@
         .active {
             display: block;
         }
+
+
+        #map2 {
+            width: 100%;
+            height: 600px;
+            overflow: hidden;
+            border: 2px solid #ccc;
+            margin: auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 左侧面板（可折叠） */
+        #leftPane {
+            width: 50%;
+            min-width: 200px;
+            max-width: 100%;
+            position: relative;
+            transition: width 0.25s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+            #leftPane.collapsed {
+                width: 0px;
+            }
+
+        /* 折叠按钮 */
+        #toggleBtn {
+            position: absolute;
+            top: 10px;
+            right: -12px;
+            z-index: 10;
+            width: 24px;
+            height: 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            border: 1px solid #aaa;
+            background: white;
+            font-size: 12px;
+        }
+
+        /* 中间拖拽条 */
+        #divider {
+            width: 6px;
+            cursor: col-resize;
+            background: #ddd;
+        }
+
+            #divider:hover {
+                background: #bbb;
+            }
+
+        /* 右侧面板 */
+        #rightPane {
+            flex: 1;
+            padding: 10px;
+            overflow: auto;
+        }
+
+        /* iframe 自适应 */
+        #mapFrame {
+            border: none;
+            width: 100%;
+            height: 100%;
+        }
+
     </style>
     <!-- Icon -->
     <link rel="icon" type="image/x-icon" href="static/assets/favicon.ico" />
@@ -133,6 +200,14 @@
     <script type="text/javascript" src="static/js/js-yaml.min.js"></script>
 </head>
 <body>
+    <div id="dragMask" style="
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    display:none;
+    z-index: 9999;
+    cursor: col-resize;"></div>
+
     <!-- Navigation-->
     <nav class="header navbar navbar-expand-lg navbar-light fixed-top shadow-sm" id="mainNav">
         <div class="container px-5">
@@ -179,7 +254,19 @@
 
     <div>
         <iframe id="map1" class="map-frame active" src="map/map_line.html"></iframe>
-        <iframe id="map2" class="map-frame" src="map/map_rail.html"></iframe>
+        <div id="map2" style="display:none">
+            <div id="leftPane">
+                <button id="toggleBtn">⮜</button>
+                <iframe id="mapFrame" src="map/map_rail.html"></iframe>
+            </div>
+
+            <div id="divider"></div>
+
+            <div id="rightPane">
+                <canvas id="scatterChart"></canvas>
+            </div>
+
+        </div>
         <iframe id="map3" class="map-frame" src="map/map_with_polyline_cityselect.html"></iframe>
         <iframe id="map4" class="map-frame" src="map/straight-line.html"></iframe>
         <iframe id="map5" class="map-frame" src="map/map_city.html"></iframe>
@@ -201,6 +288,7 @@
             <canvas id="histogramChart" style="margin-top:30px;"></canvas>
             <canvas id="departChart" style="margin-top:20px;"></canvas>
             <canvas id="arriveChart" style="margin-top:20px;"></canvas>
+            <!--<canvas id="scatterChart" style="margin-top:20px;"></canvas>-->
         </div>
     </div>
 
@@ -211,16 +299,21 @@
 
 
     <script>
+
         let chartInstances = [];
 
         function showMap(mapId) {
             const maps = document.getElementsByClassName('map-frame');
             for (let i = 0; i < maps.length; i++) maps[i].classList.remove('active');
+            const map2 = document.getElementById('map2');
+            map2.style.display = "none";
             document.getElementById(mapId).classList.add('active');
+
 
             const stats = document.getElementById('train-stats');
 
             if (mapId === "map2") {
+                map2.style.display = "flex";
                 stats.style.display = "block";
                 loadStats();
                 drawDepartChart();
@@ -236,19 +329,19 @@
 
             fillBasicStats(statsData);
             drawHistogram(chartsData.durations);
-
+            drawScatterChart()
 
         }
 
         function fillBasicStats(data) {
             document.getElementById("stats-basic").innerHTML = `
-                <div>📌 <b>Total Trips：</b> ${data.total_trips}</div>
-                <div>⏱️ <b>Total Trips：</b> ${data.total_time}</div>
-                <div>🏆 <b>Longest Trip:</b> ${data.longest_trip.train} ${data.longest_trip.from}→${data.longest_trip.to}（${data.longest_trip.duration}）</div>
-                <div>⚡ <b>Shortest Trip:</b> ${data.shortest_trip.train} ${data.shortest_trip.from}→${data.shortest_trip.to}（${data.shortest_trip.duration}）</div>
-                <div>🌟 <b>Short Trips (≤30 mins):</b> ${data.short_trips}</div>
-                <div>🌙 <b>Overnight Trips:</b> ${data.overnight_trips}</div>
-            `;
+                    <div>📌 <b>Total Trips：</b> ${data.total_trips}</div>
+                    <div>⏱️ <b>Total Trips：</b> ${data.total_time}</div>
+                    <div>🏆 <b>Longest Trip:</b> ${data.longest_trip.train} ${data.longest_trip.from}→${data.longest_trip.to}（${data.longest_trip.duration}）</div>
+                    <div>⚡ <b>Shortest Trip:</b> ${data.shortest_trip.train} ${data.shortest_trip.from}→${data.shortest_trip.to}（${data.shortest_trip.duration}）</div>
+                    <div>🌟 <b>Short Trips (≤30 mins):</b> ${data.short_trips}</div>
+                    <div>🌙 <b>Overnight Trips:</b> ${data.overnight_trips}</div>
+                `;
         }
 
         async function drawDepartChart() {
@@ -269,7 +362,7 @@
 
             // -------------------------
             // 2. 整点小时分布 bins (0~23)
-           // --------------------------
+            // --------------------------
             const bins = new Array(24).fill(0);
             hours.forEach(h => {
                 if (h >= 0 && h < 24) bins[h]++;
@@ -349,6 +442,122 @@
                 }
             });
         }
+
+
+        function hmToFloat(timeStr) {
+            const [h, m] = timeStr.split(":").map(Number);
+            return h + m / 60;
+        }
+
+        function colorForGroup(group) {
+            const predefined = {
+                G: "rgba(31,119,180,0.65)",
+                D: "rgba(255,127,14,0.65)",
+                C: "rgba(44,160,44,0.65)",
+                S: "rgba(214,39,40,0.65)",
+                K: "rgba(148,103,189,0.65)",
+                Z: "rgba(140,86,75,0.65)",
+                T: "rgba(227,119,194,0.65)",
+                "数字车次": "rgba(255,152,0,0.65)"
+            };
+
+            if (predefined[group]) return predefined[group];
+
+            // fallback color
+            return "rgba(100,100,100,0.65)";
+        }
+
+
+        function getTrainGroup(train) {
+            if (/^[A-Za-z]/.test(train)) {
+                return train[0].toUpperCase();   // G / D / C / K / Z / T...
+            }
+            return "数字车次";   // pure number
+        }
+
+        async function drawScatterChart() {
+            const chartsData = await (await fetch("data/charts.json")).json();
+            const rides = chartsData.rides;
+
+            // 按首字母 / 数字分组
+            const groups = {};
+
+            rides.forEach(r => {
+                const group = getTrainGroup(r.train);
+
+                if (!groups[group]) groups[group] = [];
+
+                groups[group].push({
+                    x: hmToFloat(r.on),
+                    y: hmToFloat(r.off),
+                    r: Math.max(4, r.duration / 35),
+
+                    _ride: r
+                });
+            });
+
+            // datasets 建立
+            const datasets = Object.keys(groups).map(group => ({
+                label: group,
+                data: groups[group],
+                backgroundColor: colorForGroup(group),
+                borderColor: colorForGroup(group),
+                borderWidth: 1
+            }));
+
+            const ctx = document.getElementById("scatterChart").getContext("2d");
+
+            if (window.scatterChart instanceof Chart) window.scatterChart.destroy();
+
+            window.scatterChart = new Chart(ctx, {
+                type: "bubble",
+                data: {
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    
+                    scales: {
+                        x: {
+                            type: "linear",
+                            min: 0,
+                            max: 24,
+                            title: { display: true, text: "departure time" }
+                        },
+                        y: {
+                            type: "linear",
+                            min: 0,
+                            max: 24,
+                            title: { display: true, text: "arrival time" }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: "right",
+                            labels: {
+                                usePointStyle: true  // 圆点样式更好看
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => {
+                                    const ride = ctx.raw._ride;
+                                    const mapFrame = document.getElementById("mapFrame");
+                                    mapFrame.contentWindow.postMessage({
+                                        type: "highlight_train",
+                                        train: ride.train
+                                    }, "*");
+                                    return `Train:${ride.train} From:${ride.from} To:${ride.to} on:${ride.on} off:${ride.off} duration:${ride.duration}min`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+
+
 
         async function drawArriveChart() {
             const chartsData = await (await fetch("data/charts.json")).json();
@@ -496,6 +705,56 @@
                 }
             });
         }
+
+
+        const divider = document.getElementById("divider");
+        const leftPane = document.getElementById("leftPane");
+        const toggleBtn = document.getElementById("toggleBtn");
+        const dragMask = document.getElementById("dragMask");
+
+        let isDragging = false;
+
+        // 拖动开始
+        divider.addEventListener("mousedown", (e) => {
+            isDragging = true;
+            dragMask.style.display = "block";   // ⬅️ 启动遮罩层
+        });
+
+        // 拖动中
+        document.addEventListener("mousemove", (e) => {
+            if (!isDragging) return;
+
+            const newWidth = e.clientX;
+            if (newWidth > 0 && newWidth < window.innerWidth) {
+                leftPane.style.width = newWidth-5 + "px";
+            }
+            if (newWidth > window.innerWidth - 500) {
+                rightPane.style.display = "none";
+            }
+            else rightPane.style.display = "block";
+        });
+
+        // 拖动结束
+        document.addEventListener("mouseup", (e) => {
+            isDragging = false;
+            dragMask.style.display = "none"; // ⬅️ 关闭遮罩层
+        });
+
+
+        // 折叠 / 展开
+        toggleBtn.addEventListener("click", () => {
+            if (leftPane.classList.contains("collapsed")) {
+                leftPane.classList.remove("collapsed");
+                leftPane.style.width = "100%";
+                rightPane.style.display = "none";
+                toggleBtn.textContent = "⮜";
+            } else {
+                leftPane.classList.add("collapsed");
+                leftPane.style.width = 0;
+                rightPane.style.display = "block";
+                toggleBtn.textContent = "⮞";
+            }
+        });
     </script>
 
     <!-- Footer-->

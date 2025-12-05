@@ -95,6 +95,17 @@ charts['latestarr'] = {
 charts['arrive_hours'] = list(filter(lambda i: i is not None,[i.hour if type(i) is not float else None for i in data['下车时间']]))
 
 
+
+# 上下车时间散点图数据
+
+charts['rides'] = [{"on":row['上车时间'].strftime('%H:%M'),
+                    "off":row['下车时间'].strftime('%H:%M'),
+                    "duration":int(row['时长.1']),
+                    "train":row['车次'],
+                    "from":row['上车站'],
+                    "to":row['下车站']} for i,row in data[26:].iterrows()]
+
+
 with open(f'{output}/stats.json', 'w',encoding='utf-8') as f:
     json.dump(stats, f,ensure_ascii=False)
     
