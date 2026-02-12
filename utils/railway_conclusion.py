@@ -1,4 +1,5 @@
 # -*- coding: GBK -*-
+from cmath import nan
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
@@ -12,7 +13,7 @@ output = sys.argv[2]
 
 print("reading travel history")
 data = pd.read_excel(f'{database}/火车乘坐记录.xlsx', sheet_name = '乘坐列表')
-#data = data.fillna(0)
+#data = data.fillna('NaN')
 #statdata.head()
 stats = {}
 charts = {}
@@ -54,7 +55,28 @@ night = data[data['跨天']>=1].shape[0]
 stats['overnight_trips'] = night
 
 charts['durations'] = [round(x) for x in data['时长.1']]
+charts['distances'] = [x for x in data['里程']]
 
+#总乘坐里程
+total_dis = sum(data['里程'])
+stats['total_distance'] = f'{total_dis}km'
+
+#最远和最近的旅程
+dismax = data.loc[data['里程'].idxmax()]
+dis = dismax['里程']
+
+stats['farest_trip'] = {'train':dismax['车次'],
+                        'from':dismax['上车站'],
+                        'to':dismax['下车站'],
+                        'distance':f'{dis}km'}
+
+dismin = data.loc[data['里程'].idxmin()]
+dis = dismin['里程']
+
+stats['nearest_trip'] = {'train':dismin['车次'],
+                        'from':dismin['上车站'],
+                        'to':dismin['下车站'],
+                        'distance':f'{dis}km'}
 
 #出发时间
 earliestdep = data.loc[data['上车时间'][26:].idxmin()]
@@ -101,9 +123,10 @@ charts['arrive_hours'] = list(filter(lambda i: i is not None,[i.hour if type(i) 
 charts['rides'] = [{"on":row['上车时间'].strftime('%H:%M'),
                     "off":row['下车时间'].strftime('%H:%M'),
                     "duration":int(row['时长.1']),
+                    "distance":int(row['里程']),
                     "train":row['车次'],
                     "from":row['上车站'],
-                    "to":row['下车站']} for i,row in data[26:].iterrows()]
+                    "to":row['下车站']} for i,row in data.iterrows()]
 
 
 with open(f'{output}/stats.json', 'w',encoding='utf-8') as f:

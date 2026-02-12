@@ -19,7 +19,7 @@ print("drawing map")
 # ´´½¨µ×Í¼
 base_map = folium.Map(
     location=[35.0, 105.0],
-    tiles='http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+    tiles='https://webrd04.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=7&x={x}&y={y}&z={z}',#'http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
     attr="&copy; <a href='https://stadiamaps.com/' target='_blank'>Stadia Maps</a> &copy; <a href='https://openmaptiles.org/' target='_blank'>OpenMapTiles</a> &copy; <a href='https://www.openstreetmap.org/copyright' target='_blank'>OpenStreetMap</a>&copy; <a href='https://stamen.com/' target='_blank'>Stamen Design</a>",
     zoom_start=5
 )

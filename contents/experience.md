@@ -1,6 +1,6 @@
 ### **Cell Segmentation and Quantitative Analysis for Immunohistochemical Staining Pathological Images**
 
-**September 2023 – March 2024 | Supervisor: Lichi Zhang (SJTU)**  
+**September 2023 – March 2024 | Supervisor: Prof. Lichi Zhang (SJTU)**  
 
 Participant in China International College Students' Innovation Competition 2024
 
@@ -14,7 +14,7 @@ Participant in China International College Students' Innovation Competition 2024
 
 ### **Screening and Analysis of Lung Tissue Cell-Specific DNA Methylation Biomarkers**
 
-**March 2024 – June 2024 | Supervisor: Yani Kang (SJTU)**
+**March 2024 – June 2024 | Supervisor: Dr. Yani Kang (SJTU)**
 
 Third prize in the Tsien Hsue-shen Cup Science and Technology Innovation Competition
 
@@ -26,7 +26,7 @@ Third prize in the Tsien Hsue-shen Cup Science and Technology Innovation Competi
 
 ### **Study on Methylation-based Diagnostic Biomarkers in cfDNA of Patients with Head and Neck Tumors**
 
-**September 2024 – June 2025 |  Supervisor: Yani Kang (SJTU)**
+**September 2024 – June 2025 |  Supervisor: Dr. Yani Kang (SJTU)**
 
 Awarded in the Graduation Project Exhibition Competition (9/90)
 
@@ -34,12 +34,12 @@ Awarded in the Graduation Project Exhibition Competition (9/90)
 
 - Screened 1,157 cell-specific methylation sites from WGBS data.
 
-- Discovered 11 methylation markers with high cell specificity through integrative bioinformatic analysis.
+- Identified 11 highly cell-specific methylation markers through integrative bioinformatic analysis.
 
-- Designed primers and constructed cfDNA methylation libraries for plasma samples collected from patients.
+- Collected plasma samples from patients and performed laboratory validation.
 
-- Validated marker presence exclusively in patient cfDNA, demonstrating diagnostic potential.
+- Established a complete workflow for cfDNA-based cancer detection, integrating computational screening, lab validation, and data analysis.
 
 - Established a complete workflow combining computational screening, lab validation, and data analysis for cfDNA-based cancer detection.
 
-- Manuscript in preparation.
+- Patent applied and manuscript currently under review

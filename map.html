@@ -7,6 +7,7 @@
     <meta name="author" content="Tianci Wang" />
     <title>My Travel Map</title>
     <style>
+        
         body {
             font-family: "Helvetica Neue", Arial, sans-serif;
             margin: 0;
@@ -84,6 +85,7 @@
             transition: width 0.25s ease;
             display: flex;
             flex-direction: column;
+            height: 100%;
         }
 
             #leftPane.collapsed {
@@ -117,11 +119,38 @@
             }
 
         /* 右侧面板 */
+        /* 右侧面板：让图表槽位可伸缩 */
         #rightPane {
             flex: 1;
             padding: 10px;
-            overflow: auto;
+            overflow: hidden; /* 原来 auto 容易导致尺寸计算怪 */
+            display: flex;
+            flex-direction: column;
+            min-height: 0; /* 关键：允许内部 flex 子项正确收缩/扩展 */
+            box-sizing: border-box;
+            max-height: 600px;
         }
+
+        /* 地图旁图表槽位：占满右侧剩余高度 */
+        #dockSlot {
+            flex: 1;
+            min-height: 0; /* 关键 */
+        }
+
+        /* 下方 stats 的槽位：给一个明确高度（不然 canvas 会卡在初始高度） */
+        #statsHistSlot, #statsScatterSlot {
+            height: 500px;
+            max-height: 100%;
+        }
+
+            /* canvas 始终吃满父容器 */
+            #dockSlot canvas,
+            #statsHistSlot canvas,
+            #statsScatterSlot canvas {
+                width: 100% !important;
+                height: 100% !important;
+                display: block;
+            }
 
         /* iframe 自适应 */
         #mapFrame {
@@ -129,6 +158,7 @@
             width: 100%;
             height: 100%;
         }
+
 
     </style>
     <!-- Icon -->
@@ -263,7 +293,17 @@
             <div id="divider"></div>
 
             <div id="rightPane">
-                <canvas id="scatterChart"></canvas>
+                <div id="dockControls" style="display:flex;gap:8px;align-items:center;margin:6px 0 10px;">
+                    <button id="showScatterBtn">📍 Scatter</button>
+                    <button id="showHistBtn">📊 Histogram</button>
+                    <button id="switchScatter" style="display:none">Switch Scatter</button>
+                </div>
+
+                <!-- 地图旁边的“图表槽位” -->
+                <div id="dockSlot" style="position: relative;">
+                    <canvas id="scatterChart"></canvas>
+                </div>
+
             </div>
 
         </div>
@@ -285,7 +325,10 @@
             </div>
 
             <h3 style="margin-top:30px;">📊 Visualization</h3>
-            <canvas id="histogramChart" style="margin-top:30px;"></canvas>
+            <div id="statsHistSlot" style="position: relative; margin-top:30px;">
+                <canvas id="histogramChart"></canvas>
+            </div>
+            <div id="statsHint" style="margin-top:10px;"></div>
             <canvas id="departChart" style="margin-top:20px;"></canvas>
             <canvas id="arriveChart" style="margin-top:20px;"></canvas>
             <!--<canvas id="scatterChart" style="margin-top:20px;"></canvas>-->
@@ -316,6 +359,15 @@
                 map2.style.display = "flex";
                 stats.style.display = "block";
                 loadStats();
+                const ro = new ResizeObserver(() => {
+                    // 合并多次变化，避免频繁 resize
+                    requestAnimationFrame(resizeAllCharts);
+                });
+
+                ["rightPane", "dockSlot", "statsHistSlot", "statsScatterSlot", "map2"].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) ro.observe(el);
+                });
                 drawDepartChart();
                 drawArriveChart();
             } else {
@@ -328,19 +380,25 @@
             const chartsData = await (await fetch("data/charts.json")).json();
 
             fillBasicStats(statsData);
-            drawHistogram(chartsData.durations);
-            drawScatterChart()
+            drawHistogram(chartsData.durations,chartsData.distances);
+            drawScatterChart();
+            showDockedChart("hist");
+            showDockedChart("scatter");
+            requestAnimationFrame(resizeAllCharts);
 
         }
 
         function fillBasicStats(data) {
             document.getElementById("stats-basic").innerHTML = `
-                    <div>📌 <b>Total Trips：</b> ${data.total_trips}</div>
-                    <div>⏱️ <b>Total Trips：</b> ${data.total_time}</div>
-                    <div>🏆 <b>Longest Trip:</b> ${data.longest_trip.train} ${data.longest_trip.from}→${data.longest_trip.to}（${data.longest_trip.duration}）</div>
-                    <div>⚡ <b>Shortest Trip:</b> ${data.shortest_trip.train} ${data.shortest_trip.from}→${data.shortest_trip.to}（${data.shortest_trip.duration}）</div>
-                    <div>🌟 <b>Short Trips (≤30 mins):</b> ${data.short_trips}</div>
-                    <div>🌙 <b>Overnight Trips:</b> ${data.overnight_trips}</div>
+                    <div><b>Total Trips：</b> ${data.total_trips}</div>
+                    <div><b>Total Trips：</b> ${data.total_time}</div>
+                    <div><b>Longest Trip:</b> ${data.longest_trip.train} ${data.longest_trip.from}→${data.longest_trip.to}（${data.longest_trip.duration}）</div>
+                    <div><b>Shortest Trip:</b> ${data.shortest_trip.train} ${data.shortest_trip.from}→${data.shortest_trip.to}（${data.shortest_trip.duration}）</div>
+                    <div><b>Short Trips (≤30 mins):</b> ${data.short_trips}</div>
+                    <div><b>Overnight Trips:</b> ${data.overnight_trips}</div>
+                    <div><b>Total Distance：</b> ${data.total_distance}</div>
+                    <div><b>Farest Trip：</b> ${data.farest_trip.train} ${data.farest_trip.from}→${data.farest_trip.to}（${data.farest_trip.distance}）</div>
+                    <div><b>Nearest Trip：</b> ${data.nearest_trip.train} ${data.nearest_trip.from}→${data.nearest_trip.to}（${data.nearest_trip.distance}）</div>
                 `;
         }
 
@@ -516,7 +574,7 @@
                 },
                 options: {
                     responsive: true,
-                    
+                    maintainAspectRatio: false,
                     scales: {
                         x: {
                             type: "linear",
@@ -548,6 +606,87 @@
                                         train: ride.train
                                     }, "*");
                                     return `Train:${ride.train} From:${ride.from} To:${ride.to} on:${ride.on} off:${ride.off} duration:${ride.duration}min`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function drawAnotherScatter() {
+            const chartsData = await (await fetch("data/charts.json")).json();
+            const rides = chartsData.rides;
+
+            // 按首字母 / 数字分组
+            const groups = {};
+
+            rides.forEach(r => {
+                const group = getTrainGroup(r.train);
+
+                if (!groups[group]) groups[group] = [];
+
+                groups[group].push({
+                    x: r.distance,
+                    y: r.duration,
+                    r: 4,
+
+                    _ride: r
+                });
+            });
+
+            // datasets 建立
+            const datasets = Object.keys(groups).map(group => ({
+                label: group,
+                data: groups[group],
+                backgroundColor: colorForGroup(group),
+                borderColor: colorForGroup(group),
+                borderWidth: 1
+            }));
+
+            const ctx = document.getElementById("scatterChart").getContext("2d");
+
+            if (window.scatterChart instanceof Chart) window.scatterChart.destroy();
+
+            window.scatterChart = new Chart(ctx, {
+                type: "bubble",
+                data: {
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: "linear",
+                            min: 0,
+                            max: 2400,
+                            title: { display: true, text: "distance(km)" }
+                        },
+                        y: {
+                            type: "linear",
+                            min: 0,
+                            max: 1400,
+                            title: { display: true, text: "duration(min)" }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: "right",
+                            labels: {
+                                usePointStyle: true  // 圆点样式更好看
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => {
+                                    const ride = ctx.raw._ride;
+                                    const mapFrame = document.getElementById("mapFrame");
+                                    mapFrame.contentWindow.postMessage({
+                                        type: "highlight_train",
+                                        train: ride.train
+                                    }, "*");
+                                    return `Train:${ride.train} From:${ride.from} To:${ride.to} distance:${ride.distance}km duration:${ride.duration}min`;
                                 }
                             }
                         }
@@ -658,54 +797,261 @@
             });
         }
 
-        function drawHistogram(durations) {
+        function drawHistogram(durations,distances) {
             // 1. 初始化 bins（0~600 每 30 一箱，总共 21 个箱）
-            const binSize = 30;
-            const maxBin = 600;
-            const bins = new Array(maxBin / binSize + 1).fill(0); // 600/30=20→21个bin
+            const binSize1 = 30;
+            const maxBin1 = 600;
+            const bins1 = new Array(maxBin1 / binSize1 + 1).fill(0); // 600/30=20→21个bin
 
             // 2. 填充数据
             durations.forEach(d => {
-                if (d >= maxBin) {
-                    bins[bins.length - 1]++;    // 溢出箱
+                if (d >= maxBin1) {
+                    bins1[bins1.length - 1]++;    // 溢出箱
                 } else {
-                    const index = Math.floor(d / binSize);
-                    bins[index]++;
+                    const index = Math.floor(d / binSize1);
+                    bins1[index]++;
                 }
             });
 
             // 3. 构建 x 轴区间标签，例如 "0-30" "30-60" ... "570–600" "600+"
-            const labels = [];
-            for (let i = 0; i < bins.length - 1; i++) {
-                labels.push(`${i * binSize}-${(i + 1) * binSize}`);
+            const labels1 = [];
+            for (let i = 0; i < bins1.length - 1; i++) {
+                labels1.push(`${i * binSize1}-${(i + 1) * binSize1}`);
             }
-            labels.push("600+");
+            labels1.push("600+");
+
+            // distance
+            // 1. 初始化 bins（0~2000 每 100 一箱，总共 21 个箱）
+            const binSize2 = 100;
+            const maxBin2 = 2000;
+            const bins2 = new Array(maxBin2 / binSize2 + 1).fill(0); // 2000/100=20→21个bin
+
+            // 2. 填充数据
+            distances.forEach(d => {
+                if (d >= maxBin2) {
+                    bins2[bins2.length - 1]++;    // 溢出箱
+                } else {
+                    const index = Math.floor(d / binSize2);
+                    bins2[index]++;
+                }
+            });
+
+            // 3. 构建 x 轴区间标签
+            const labels2 = [];
+            for (let i = 0; i < bins2.length - 1; i++) {
+                labels2.push(`${i * binSize2}-${(i + 1) * binSize2}`);
+            }
+            labels2.push("2000+");
+
+
 
             // 4. 绘图
             const ctx = document.getElementById("histogramChart").getContext("2d");
 
             if (window.histChart) window.histChart.destroy();
 
+            // bins1/labels1: 第一个直方图
+            // bins2/labels2: 第二个直方图
+
             window.histChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: labels,
-                    datasets: [{
-                        label: "Distribution of Travel Duration",
-                        data: bins,
-                        borderWidth: 1
-                    }]
+                    datasets: [
+                        {
+                            label: "Travel Duration",
+                            data: labels1.map((lab, i) => ({ x: lab, y: bins1[i] })),
+                            xAxisID: 'x1',
+                            yAxisID: 'y1',
+                            borderWidth: 1
+                        },
+                        {
+                            label: "Travel Distance",
+                            data: labels2.map((lab, i) => ({ x: lab, y: bins2[i] })),
+                            xAxisID: 'x2',
+                            yAxisID: 'y2',
+                            borderWidth: 1,
+                            hidden: true   // 默认先隐藏第二个
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
+                    parsing: false, // 因为我们用 {x,y} 形式
                     scales: {
-                        x: { title: { display: true, text: "Time (min)" } },
-                        y: { title: { display: true, text: "Count" }, beginAtZero: true }
+                        x1: {
+                            type: 'category',
+                            labels: labels1,
+                            display: true,
+                            title: { display: true, text: "Time (min)" }
+                        },
+                        y1: {
+                            beginAtZero: true,
+                            display: true,
+                            title: { display: true, text: "Count (Chart 1)" }
+                        },
+                        x2: {
+                            type: 'category',
+                            labels: labels2,
+                            display: false, // 默认隐藏（因为 dataset2 默认 hidden）
+                            title: { display: true, text: "Distance (km)" }
+                        },
+                        y2: {
+                            beginAtZero: true,
+                            display: false,
+                            position: 'right',
+                            title: { display: true, text: "Count (Chart 2)" }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            onClick: (e, legendItem, legend) => {
+                                const chart = legend.chart;
+                                const clicked = legendItem.datasetIndex;
+
+                                // 只保留被点击的那个 dataset 显示
+                                chart.data.datasets.forEach((ds, i) => {
+                                    ds.hidden = (i !== clicked) ? true : !ds.hidden; // 再点一次可隐藏它自己
+                                });
+
+                                // 根据当前显示的 dataset 来切换轴显示
+                                const show1 = !chart.data.datasets[0].hidden;
+                                const show2 = !chart.data.datasets[1].hidden;
+
+                                chart.options.scales.x1.display = show1;
+                                chart.options.scales.y1.display = show1;
+                                chart.options.scales.x2.display = show2;
+                                chart.options.scales.y2.display = show2;
+
+                                chart.update();
+                            }
+                        },
+                        tooltip: {
+                            enabled: true,
+                            mode: 'nearest',
+                            intersect: true,
+
+                            callbacks: {
+                                // 1) 标题：默认一般就是 x 轴对应的 label
+                                title: (items) => {
+                                    if (!items.length) return '';
+                                    const item = items[0];
+                                    label = item.label;
+                                    //const start, end;
+                                    if (label.endsWith('+')) {
+                                        start = Number(label.slice(0, -1));
+                                        end = 999999;
+                                    }
+                                    else  [start, end] = label.split('-').map(Number);
+                                    
+                                    
+
+                                    const dsLabel = item.dataset?.label ?? '';
+
+
+                                    const mapFrame = document.getElementById("mapFrame");
+                                    mapFrame.contentWindow.postMessage({
+                                        type: dsLabel,
+                                        start: start,
+                                        end: end
+                                    }, "*");
+
+
+                                    return item.label ?? (item.raw && item.raw.x != null ? String(item.raw.x) : '');
+                                },
+
+                                // 2) 每一行：默认是 "Dataset Label: Value"
+                                label: (item) => {
+                                    const dsLabel = item.dataset?.label ?? '';
+
+                                    // Chart.js 已经帮你格式化了数字 -> formattedValue
+                                    const value = item.formattedValue ?? '';
+
+                                    // 默认如果 dsLabel 为空就只显示 value
+                                    return dsLabel ? `${dsLabel}: ${value}` : `${value}`;
+                                },
+
+                                // 3) 颜色小方块/marker对应的文字（一般不需要改，保持默认即可）
+                                labelColor: (item) => {
+                                    const style = item.chart.getDatasetMeta(item.datasetIndex).controller.getStyle(item.dataIndex);
+                                    return {
+                                        borderColor: style.borderColor,
+                                        backgroundColor: style.backgroundColor,
+                                        borderWidth: style.borderWidth,
+                                        borderDash: style.borderDash,
+                                        borderDashOffset: style.borderDashOffset,
+                                        borderRadius: 0,
+                                    };
+                                },
+
+                                // 4) 其他默认回调：不写就是空（相当于默认）
+                                // afterLabel: () => '',
+                                // footer: () => ''
+                            }
+                        }
                     }
                 }
             });
         }
+        function switchScatter() {
+            const chart = window.scatterChart;
+            const axistext = chart.options.scales?.x?.title?.text;
+            if (axistext === "departure time") {
+                drawAnotherScatter();
+            }
+            else {
+                drawScatterChart();
+            };
 
+
+        }
+
+
+        function moveCanvasTo(canvasId, targetSlotId) {
+            const canvas = document.getElementById(canvasId);
+            const slot = document.getElementById(targetSlotId);
+            if (!canvas || !slot) return;
+
+            slot.appendChild(canvas);
+
+        }
+
+        function showDockedChart(which) {
+            const dockSlot = document.getElementById("dockSlot");
+            const statsSlot = document.getElementById("statsHistSlot");  // 统一用一个下方槽位
+            const statsHint = document.getElementById("statsHint");
+
+            if (!dockSlot || !statsSlot || !statsHint) return;
+
+            statsHint.innerHTML = "";
+
+            if (which === "scatter") {
+                // scatter -> 右侧；histogram -> 下方（真正交换）
+                moveCanvasTo("scatterChart", "dockSlot");
+                moveCanvasTo("histogramChart", "statsHistSlot");
+
+                statsHint.innerHTML = `<button id="bringHistUpBtn">⬆️ Put Histogram beside the map</button>`;
+                document.getElementById("bringHistUpBtn").onclick = () => showDockedChart("hist");
+                document.getElementById("switchScatter").style.display = "block";
+            } else {
+                // histogram -> 右侧；scatter -> 下方（真正交换）
+                moveCanvasTo("histogramChart", "dockSlot");
+                moveCanvasTo("scatterChart", "statsHistSlot");
+
+                statsHint.innerHTML = `<button id="bringScatterUpBtn">⬆️ Put Scatter beside the map</button>
+                <button id="switchScatterBtn">Switch Scatter</button>`;
+                document.getElementById("bringScatterUpBtn").onclick = () => showDockedChart("scatter");
+                document.getElementById("switchScatterBtn").onclick = () => switchScatter();
+                document.getElementById("switchScatter").style.display = "none";
+            };
+
+            requestAnimationFrame(resizeAllCharts);
+        }
+
+        // 绑定右侧两个按钮
+        document.getElementById("showScatterBtn")?.addEventListener("click", () => showDockedChart("scatter"));
+        document.getElementById("showHistBtn")?.addEventListener("click", () => showDockedChart("hist"));
+        document.getElementById("switchScatter")?.addEventListener("click", () => switchScatter());
 
         const divider = document.getElementById("divider");
         const leftPane = document.getElementById("leftPane");
@@ -731,13 +1077,14 @@
             if (newWidth > window.innerWidth - 500) {
                 rightPane.style.display = "none";
             }
-            else rightPane.style.display = "block";
+            else rightPane.style.display = "flex";
         });
 
         // 拖动结束
         document.addEventListener("mouseup", (e) => {
             isDragging = false;
             dragMask.style.display = "none"; // ⬅️ 关闭遮罩层
+            resizeAllCharts();
         });
 
 
@@ -751,10 +1098,22 @@
             } else {
                 leftPane.classList.add("collapsed");
                 leftPane.style.width = 0;
-                rightPane.style.display = "block";
+                rightPane.style.display = "flex";
                 toggleBtn.textContent = "⮞";
             }
+            requestAnimationFrame(resizeAllCharts);
         });
+
+        function resizeAllCharts() {
+            if (window.scatterChart instanceof Chart) {
+                window.scatterChart.maintainAspectRatio = false;
+                window.scatterChart.resize();
+            }
+            if (window.histChart instanceof Chart) {
+                window.histChart.maintainAspectRatio = false;
+                window.histChart.resize();
+            }
+        }
     </script>
 
     <!-- Footer-->

@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="Academic Webpage" />
+    <meta name="author" content="Tianci Wang" />
+    <title>My Travel Map</title>
+    <style>
+        body {
+            font-family: "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f9fc;
+            color: #333;
+        }
+
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .button-group {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+            .button-group button {
+                background-color: #3498db;
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                margin: 0 10px;
+                font-size: 16px;
+                border-radius: 6px;
+                cursor: pointer;
+                transition: background-color 0.3s ease, transform 0.2s ease;
+            }
+
+                .button-group button:hover {
+                    background-color: #2980b9;
+                    transform: scale(1.05);
+                }
+
+        .map-frame {
+            width: 95%;
+            height: 600px;
+            display: none;
+            border: 2px solid #ccc;
+            margin: auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .active {
+            display: block;
+        }
+    </style>
+    <!-- Icon -->
+    <link rel="icon" type="image/x-icon" href="static/assets/favicon.ico" />
+
+    <!-- Bootstrap icons-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
+
+    <!-- Google fonts-->
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,600;1,600&amp;display=swap"
+          rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,300;0,500;0,600;0,700;1,300;1,500;1,600;1,700&amp;display=swap"
+          rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,400;1,400&amp;display=swap"
+          rel="stylesheet" />
+
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link type="text/css" href="static/css/styles.css" rel="stylesheet" />
+    <link type="text/css" href="static/css/main.css" rel="stylesheet" />
+
+    <!-- Bootstrap core JS-->
+    <script type="text/javascript" src="static/js/bootstrap.bundle.min.js"></script>
+
+    <!-- For Compatability -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
+    <!-- Markdown -->
+    <script type="text/javascript" src="static/js/marked.min.js"></script>
+
+    <!-- Mathematics -->
+    <script>
+        // See https://docs.mathjax.org/en/latest/index.html for more details.
+        MathJax = {
+            tex: {
+                packages: {},              // extensions to use
+                inlineMath: [              // start/end delimiter pairs for in-line math
+                    ['$', '$'],
+                    ['\\(', '\\)']
+                ],
+                displayMath: [             // start/end delimiter pairs for display math
+                    ['$$', '$$'],
+                    ['\\[', '\\]']
+                ],
+                processEscapes: false,      // use \$ to produce a literal dollar sign
+                processEnvironments: true, // process \begin{xxx}...\end{xxx} outside math mode
+                processRefs: true,         // process \ref{...} outside of math mode
+                digits: /^(?:[0-9]+(?:\{,\}[0-9]{3})*(?:\.[0-9]*)?|\.[0-9]+)/,    // pattern for recognizing numbers
+                tags: 'all',              // or 'ams' or 'all'
+                tagSide: 'right',          // side for \tag macros
+                tagIndent: '0.8em',        // amount to indent tags
+                useLabelIds: true,         // use label name rather than tag for ids
+                maxMacros: 10000,          // maximum number of macro substitutions per expression
+                maxBuffer: 5 * 1024,       // maximum size for the internal TeX string (5K)
+                // baseURL:                   // URL for use with links to tags (when there is a <base> tag in effect)
+                // (document.getElementsByTagName('base').length === 0) ? '' : String(document.location).replace(/#.*$/, ''),
+                formatError:               // function called when TeX syntax errors occur
+                    (jax, err) => jax.formatError(err)
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script"
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script type="text/javascript" id="MathJax-script" async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- Core JS-->
+    <script type="text/javascript" src="static/js/scripts.js"></script>
+    <script type="text/javascript" src="static/js/js-yaml.min.js"></script>
+</head>
+<body>
+    <!-- Navigation-->
+    <nav class="header navbar navbar-expand-lg navbar-light fixed-top shadow-sm" id="mainNav">
+        <div class="container px-5">
+            <a id="page-top-title" class="navbar-brand fw-bold" href="index.html"></a>
+            <!-- <a href="#page-top"><img src="static/assets/img/CUMT_LOGO.svg" style="width: 11rem;"></a> -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive"
+                    aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                MENU
+                <i class="bi-list"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ms-auto me-4 my-3 my-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link me-lg-3" href="resume.html">Resume</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link me-lg-3" href="map.html">Travel map</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Top Section -->
+    <section class="top-section" style="background-image: url('static/assets/img/background.jpeg');">
+        <div class="top-section-content">
+            <div class="container px-5">
+                <h2 id="top-section-bg-text" class="text-white display-3 lh-1 font-alt"></h2>
+            </div>
+        </div>
+    </section>
+    <!-- Top Section -->
+    <header>
+        <h1>🗺️ My Travel Map</h1>
+    </header>
+    <<div class="button-group">
+        <button onclick="showMap('map1')">Straight-line map (airplane,train)</button>
+        <button onclick="showMap('map2')">Route map (train)</button>
+        <button onclick="showMap('map3')">Route map (cycling)</button>
+        <button onclick="showMap('map4')">Straight-line map (cycling)</button><br><br>
+        <button onclick="showMap('map5')">Chinese city exploration level</button>
+        <button onclick="showMap('map6')">Shanghai exploration</button>
+    </div>
+
+    <div>
+        <iframe id="map1" class="map-frame active" src="map/map_line.html"></iframe>
+        <div id="map2"  
+             style="display: none; height: 600px; width: 95%; margin: 5px auto; padding: 0px; background: white; border-radius: 16px; box-shadow: 0 4px 14px rgba(0,0,0,.12);">
+            <iframe src="map/map_rail.html" style="flex: 1; border: none;"></iframe>
+
+            <div style="flex: 1; overflow-y: auto;">
+                <canvas id="scatterChart" style="margin-top:10px;"></canvas>
+            </div>
+        </div>
+        <iframe id="map3" class="map-frame" src="map/map_with_polyline_cityselect.html"></iframe>
+        <iframe id="map4" class="map-frame" src="map/straight-line.html"></iframe>
+        <iframe id="map5" class="map-frame" src="map/map_city.html"></iframe>
+        <iframe id="map6" class="map-frame" src="map/map_shanghai.html"></iframe>
+    </div>
+
+    <div id="train-stats" style="display:none;">
+        <div id="stats-container"
+             style="width:95%;margin:20px auto;padding:25px;background:white;border-radius:16px;
+         box-shadow:0 4px 14px rgba(0,0,0,.12);">
+
+            <h2 style="margin-bottom:20px;">🚆 Statistics of My Train Ride Records</h2>
+
+            <div id="stats-basic" style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+                <!-- 自动填入 -->
+            </div>
+
+            <h3 style="margin-top:30px;">📊 Visualization</h3>
+            <canvas id="histogramChart" style="margin-top:30px;"></canvas>
+            <canvas id="departChart" style="margin-top:20px;"></canvas>
+            <canvas id="arriveChart" style="margin-top:20px;"></canvas>
+            <!--<canvas id="scatterChart" style="margin-top:20px;"></canvas>-->
+        </div>
+    </div>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.4.0"></script>
+
+
+    <script>
+        let chartInstances = [];
+
+        function showMap(mapId) {
+            const maps = document.getElementsByClassName('map-frame');
+            for (let i = 0; i < maps.length; i++) maps[i].classList.remove('active');
+            const map2 = document.getElementById('map2');
+            map2.style.display = "none";
+            document.getElementById(mapId).classList.add('active');
+            
+
+            const stats = document.getElementById('train-stats');
+
+            if (mapId === "map2") {
+                map2.style.display = "flex";
+                stats.style.display = "block";
+                loadStats();
+                drawDepartChart();
+                drawArriveChart();
+            } else {
+                stats.style.display = "none";
+            }
+        }
+
+        async function loadStats() {
+            const statsData = await (await fetch("data/stats.json")).json();
+            const chartsData = await (await fetch("data/charts.json")).json();
+
+            fillBasicStats(statsData);
+            drawHistogram(chartsData.durations);
+            drawScatterChart()
+
+        }
+
+        function fillBasicStats(data) {
+            document.getElementById("stats-basic").innerHTML = `
+                <div>📌 <b>Total Trips：</b> ${data.total_trips}</div>
+                <div>⏱️ <b>Total Trips：</b> ${data.total_time}</div>
+                <div>🏆 <b>Longest Trip:</b> ${data.longest_trip.train} ${data.longest_trip.from}→${data.longest_trip.to}（${data.longest_trip.duration}）</div>
+                <div>⚡ <b>Shortest Trip:</b> ${data.shortest_trip.train} ${data.shortest_trip.from}→${data.shortest_trip.to}（${data.shortest_trip.duration}）</div>
+                <div>🌟 <b>Short Trips (≤30 mins):</b> ${data.short_trips}</div>
+                <div>🌙 <b>Overnight Trips:</b> ${data.overnight_trips}</div>
+            `;
+        }
+
+        async function drawDepartChart() {
+            const chartsData = await (await fetch("data/charts.json")).json();
+
+            const hours = chartsData.depart_hours;  // 整数小时分布用
+
+            // -------------------------
+            // 1. 转换外部给定最早/最晚时间（含分钟）
+            // -------------------------
+            function convertHMToFloat(hm) {
+                const [h, m] = hm.split(":").map(Number);
+                return h + m / 60 - 0.5;
+            }
+
+            const earliestFloat = convertHMToFloat(chartsData.earliestdep.time);
+            const latestFloat = convertHMToFloat(chartsData.latestdep.time);
+
+            // -------------------------
+            // 2. 整点小时分布 bins (0~23)
+           // --------------------------
+            const bins = new Array(24).fill(0);
+            hours.forEach(h => {
+                if (h >= 0 && h < 24) bins[h]++;
+            });
+
+            // -------------------------
+            // 3. 绘图
+            // -------------------------
+            const ctx = document.getElementById("departChart").getContext("2d");
+
+            if (window.departChart instanceof Chart) {
+                window.departChart.destroy();
+            }
+
+            window.departChart = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: [...Array(24).keys()],  // 0~23
+                    datasets: [{
+                        label: "Departure Count",
+                        data: bins
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            title: { display: true, text: "Departure Time" },
+                            min: 0,
+                            max: 23
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: "Count" }
+                        }
+                    },
+                    plugins: {
+                        annotation: {
+                            annotations: {
+                                earliestLine: {
+                                    type: "line",
+                                    borderColor: "blue",
+                                    borderWidth: 2,
+                                    value: earliestFloat,
+                                    scaleID: "x",
+                                    label: {
+                                        content: [
+                                            `Earliest：${chartsData.earliestdep.time}`,
+                                            `Train：${chartsData.earliestdep.train}`,
+                                            `From：${chartsData.earliestdep.from}`,
+                                            `To：${chartsData.earliestdep.to}`
+                                        ],
+                                        enabled: true,
+                                        position: "start"
+                                    }
+                                },
+                                latestLine: {
+                                    type: "line",
+                                    borderColor: "red",
+                                    borderWidth: 2,
+                                    value: latestFloat,
+                                    scaleID: "x",
+                                    label: {
+                                        content: [
+                                            `Latest：${chartsData.latestdep.time}`,
+                                            `Train：${chartsData.latestdep.train}`,
+                                            `From：${chartsData.latestdep.from}`,
+                                            `To：${chartsData.latestdep.to}`
+                                        ],
+                                        enabled: true,
+                                        position: "start"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+
+        function hmToFloat(timeStr) {
+            const [h, m] = timeStr.split(":").map(Number);
+            return h + m / 60;
+        }
+
+        function colorForGroup(group) {
+            const predefined = {
+                G: "rgba(31,119,180,0.65)",
+                D: "rgba(255,127,14,0.65)",
+                C: "rgba(44,160,44,0.65)",
+                S: "rgba(214,39,40,0.65)",
+                K: "rgba(148,103,189,0.65)",
+                Z: "rgba(140,86,75,0.65)",
+                T: "rgba(227,119,194,0.65)",
+                "数字车次": "rgba(255,152,0,0.65)"
+            };
+
+            if (predefined[group]) return predefined[group];
+
+            // fallback color
+            return "rgba(100,100,100,0.65)";
+        }
+
+
+        function getTrainGroup(train) {
+            if (/^[A-Za-z]/.test(train)) {
+                return train[0].toUpperCase();   // G / D / C / K / Z / T...
+            }
+            return "数字车次";   // pure number
+        }
+
+        async function drawScatterChart() {
+            const chartsData = await (await fetch("data/charts.json")).json();
+            const rides = chartsData.rides;
+
+            // 按首字母 / 数字分组
+            const groups = {};
+
+            rides.forEach(r => {
+                const group = getTrainGroup(r.train);
+
+                if (!groups[group]) groups[group] = [];
+
+                groups[group].push({
+                    x: hmToFloat(r.on),
+                    y: hmToFloat(r.off),
+                    r: Math.max(4, r.duration / 30),
+
+                    _ride: r
+                });
+            });
+
+            // datasets 建立
+            const datasets = Object.keys(groups).map(group => ({
+                label: group,
+                data: groups[group],
+                backgroundColor: colorForGroup(group),
+                borderColor: colorForGroup(group),
+                borderWidth: 1
+            }));
+
+            const ctx = document.getElementById("scatterChart").getContext("2d");
+
+            if (window.scatterChart instanceof Chart) window.scatterChart.destroy();
+
+            window.scatterChart = new Chart(ctx, {
+                type: "bubble",
+                data: {
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            type: "linear",
+                            min: 0,
+                            max: 24,
+                            title: { display: true, text: "departure time" }
+                        },
+                        y: {
+                            type: "linear",
+                            min: 0,
+                            max: 24,
+                            title: { display: true, text: "arrival time" }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: "right",
+                            labels: {
+                                usePointStyle: true  // 圆点样式更好看
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => {
+                                    const ride = ctx.raw._ride;
+                                    return `Train:${ride.train} From:${ride.from} To:${ride.to} on:${ride.on} off:${ride.off} duration:${ride.duration}min`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+
+
+
+        async function drawArriveChart() {
+            const chartsData = await (await fetch("data/charts.json")).json();
+
+            const hours = chartsData.arrive_hours;  // 整数小时分布用
+
+            // -------------------------
+            // 1. 转换外部给定最早/最晚时间（含分钟）
+            // -------------------------
+            function convertHMToFloat(hm) {
+                const [h, m] = hm.split(":").map(Number);
+                return h + m / 60 - 0.5;
+            }
+
+            const earliestFloat = convertHMToFloat(chartsData.earliestarr.time);
+            const latestFloat = convertHMToFloat(chartsData.latestarr.time);
+
+            // -------------------------
+            // 2. 整点小时分布 bins (0~23)
+            // --------------------------
+            const bins = new Array(24).fill(0);
+            hours.forEach(h => {
+                if (h >= 0 && h < 24) bins[h]++;
+            });
+
+            // -------------------------
+            // 3. 绘图
+            // -------------------------
+            const ctx = document.getElementById("arriveChart").getContext("2d");
+
+            if (window.arriveChart instanceof Chart) {
+                window.arriveChart.destroy();
+            }
+
+            window.arriveChart = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: [...Array(24).keys()],  // 0~23
+                    datasets: [{
+                        label: "Arrival Count",
+                        data: bins
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            title: { display: true, text: "Arrival Time" },
+                            min: 0,
+                            max: 23
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: "Count" }
+                        }
+                    },
+                    plugins: {
+                        annotation: {
+                            annotations: {
+                                earliestLine: {
+                                    type: "line",
+                                    borderColor: "blue",
+                                    borderWidth: 2,
+                                    value: earliestFloat,
+                                    scaleID: "x",
+                                    label: {
+                                        content: [
+                                            `Earliest：${chartsData.earliestarr.time}`,
+                                            `Train：${chartsData.earliestarr.train}`,
+                                            `From：${chartsData.earliestarr.from}`,
+                                            `To：${chartsData.earliestarr.to}`
+                                        ],
+                                        enabled: true,
+                                        position: "start"
+                                    }
+                                },
+                                latestLine: {
+                                    type: "line",
+                                    borderColor: "red",
+                                    borderWidth: 2,
+                                    value: latestFloat,
+                                    scaleID: "x",
+                                    label: {
+                                        content: [
+                                            `Latest：${chartsData.latestarr.time}`,
+                                            `Train：${chartsData.latestarr.train}`,
+                                            `From：${chartsData.latestarr.from}`,
+                                            `To：${chartsData.latestarr.to}`
+                                        ],
+                                        enabled: true,
+                                        position: "start"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function drawHistogram(durations) {
+            // 1. 初始化 bins（0~600 每 30 一箱，总共 21 个箱）
+            const binSize = 30;
+            const maxBin = 600;
+            const bins = new Array(maxBin / binSize + 1).fill(0); // 600/30=20→21个bin
+
+            // 2. 填充数据
+            durations.forEach(d => {
+                if (d >= maxBin) {
+                    bins[bins.length - 1]++;    // 溢出箱
+                } else {
+                    const index = Math.floor(d / binSize);
+                    bins[index]++;
+                }
+            });
+
+            // 3. 构建 x 轴区间标签，例如 "0-30" "30-60" ... "570–600" "600+"
+            const labels = [];
+            for (let i = 0; i < bins.length - 1; i++) {
+                labels.push(`${i * binSize}-${(i + 1) * binSize}`);
+            }
+            labels.push("600+");
+
+            // 4. 绘图
+            const ctx = document.getElementById("histogramChart").getContext("2d");
+
+            if (window.histChart) window.histChart.destroy();
+
+            window.histChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "Distribution of Travel Duration",
+                        data: bins,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: { title: { display: true, text: "Time (min)" } },
+                        y: { title: { display: true, text: "Count" }, beginAtZero: true }
+                    }
+                }
+            });
+        }
+    </script>
+
+    <!-- Footer-->
+            <footer class="bg-bottom text-center py-5">
+                <div class="container px-5">
+                    <div class="text-white-50 small">
+                        <div id="copyright-text" class="mb-2"></div>
+                        <a id="github-link" href="https://github.com/Ethenone">Github</a>
+                        <span class="mx-1">&middot;</span>
+                        <a id="license-link"
+                           href="https://github.com/Ethenone/Ethenone.github.io/blob/master/LICENSE">License</a>
+                    </div>
+                </div>
+            </footer>
+
+</body>
+</html>
