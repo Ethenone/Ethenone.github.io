@@ -18,12 +18,14 @@ data_f = pd.read_excel(f'{database}/境外铁路乘坐记录.xlsx', sheet_name = '乘坐列
 data_f = data_f.fillna('NaN')
 statdata = pd.read_csv(f'{database}//stations_data.csv',encoding='gbk')
 statgeo = {}
+statbureau = {}
 for i,row in statdata.iterrows():
     lat = row['纬度']
     lng = row['经度']
     loc = [lat,lng]
 #     loc = correct(loc)
     statgeo[row['车站']]=loc
+    statbureau[row['车站']]=row['路局']
 stats = {}
 charts = {}
 
@@ -193,17 +195,21 @@ def station_cal(station,direction,moststation = False):
     if station == 'NaN':
         return
     if station not in stationcount.keys():
-        stationcount[station] = {'on':0,'off':0,'total':0}
+        lat = statgeo[station][0]
+        lng = statgeo[station][1]
+        bureau = statbureau[station]
+        stationcount[station] = {'on':0,'off':0,'total':0,
+                                 'lat':lat,'lng':lng,'bureau':bureau}
         if moststation:
             global northernmost,southernmost,easternmost,westernmost
             if statgeo[station][0] > northernmost['lat']:
-                northernmost = {'name':station,'lat':statgeo[station][0],'lng':statgeo[station][1]}
+                northernmost = {'name':station,'lat':lat,'lng':lng}
             if statgeo[station][0] < southernmost['lat']:
-                southernmost = {'name':station,'lat':statgeo[station][0],'lng':statgeo[station][1]}
+                southernmost = {'name':station,'lat':lat,'lng':lng}
             if statgeo[station][1] > easternmost['lng']:
-                easternmost = {'name':station,'lat':statgeo[station][0],'lng':statgeo[station][1]}
+                easternmost = {'name':station,'lat':lat,'lng':lng}
             if statgeo[station][1] < westernmost['lng']:
-                westernmost = {'name':station,'lat':statgeo[station][0],'lng':statgeo[station][1]}
+                westernmost = {'name':station,'lat':lat,'lng':lng}
     stationcount[station][direction] += 1
     stationcount[station]['total'] += 1
 

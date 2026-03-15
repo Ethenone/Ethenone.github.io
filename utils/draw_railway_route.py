@@ -65,6 +65,8 @@ for i in range(len(data)):
     #    color = 'blue'
     duration = int(b['时长.1'])
     distance = int(b['里程'])
+    From = b['上车站']
+    To = b['下车站']
     polyline = []
     
     for p in a[5:]:
@@ -77,16 +79,16 @@ for i in range(len(data)):
         polyline.append(loc)
         heatmap_data.append(loc)
     
-    polyline_set.append([polyline,color,train,duration,distance])
-    point_set.append([loc,color,name,train,duration,distance])
-    point_set.append([statgeo[a.iloc[5]],color,a.iloc[5],train,duration,distance])
+    polyline_set.append([polyline,color,train,duration,distance,From,To])
+    point_set.append([loc,color,name,train,duration,distance,From,To])
+    point_set.append([statgeo[a.iloc[5]],color,a.iloc[5],train,duration,distance,From,To])
 
     
 #after = folium.FeatureGroup(name='since 2024')
 #before = folium.FeatureGroup(name='before 2024')
 group = folium.FeatureGroup(name = 'all')
 group1 = folium.FeatureGroup(name = 'discard')
-for polyline,color,train,duration,distance in polyline_set:
+for polyline,color,train,duration,distance,From,To in polyline_set:
     op = 0.3
     #group  = after
     if color == 'blue':
@@ -96,7 +98,9 @@ for polyline,color,train,duration,distance in polyline_set:
         "type":"Feature",
         "properties":{"id":train,
                       "duration":duration,
-                      "distance":distance},
+                      "distance":distance,
+                      "from":From,
+                      "to":To},
         "geometry":{
             "type":"LineString",
             "coordinates":[[lng,lat] for lat, lng in polyline]}
@@ -110,7 +114,7 @@ for polyline,color,train,duration,distance in polyline_set:
         opacity=op
     ).add_to(group)
 
-for point,color,name,train,duration,distance in point_set:
+for point,color,name,train,duration,distance,From,To in point_set:
     #group = after
     #if color == 'blue':
         #group = before
@@ -118,7 +122,9 @@ for point,color,name,train,duration,distance in point_set:
         "type":"Feature",
         "properties":{"id":train,
                       "duration":duration,
-                      "distance":distance},
+                      "distance":distance,
+                      "from":From,
+                      "to":To},
         "geometry":{
             "type":"Point",
             "coordinates":[point[1],point[0]]}
@@ -155,7 +161,30 @@ custom_html = f"""
         if (msg.type === "Travel Distance") {{
             highlightDistance(msg.start, msg.end);
         }}
+        if (msg.type === "highlight_station") {{
+            highlightStation(msg.station);
+        }}
     }});
+    function highlightStation(station) {{
+        {map_var}.eachLayer(function (layer) {{
+            if (layer.feature) {{
+                if (layer.feature.properties.from === station || layer.feature.properties.to === station) {{
+                    layer.setStyle({{
+                        color: "red",
+                        weight: 6,
+                        opacity: 0.7
+                    }});
+                }}
+                else {{
+                    layer.setStyle({{
+                        color: "blue",
+                        weight: 3,
+                        opacity: 0.2
+                    }});
+                }};
+            }}
+        }});
+    }}
     function highlightDistance(start, end) {{
         {map_var}.eachLayer(function (layer) {{
             if (layer.feature) {{

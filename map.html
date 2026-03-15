@@ -349,270 +349,313 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.4.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.4.0"></script>
+    <script>
+        let chartInstances = [];
 
-
-        <script>
-
-            let chartInstances = [];
-
-            function showMap(mapId) {
-                const maps = document.getElementsByClassName('map-frame');
-                for (let i = 0; i < maps.length; i++) maps[i].classList.remove('active');
-                const map2 = document.getElementById('map2');
-                map2.style.display = "none";
-                const train_stats = document.getElementById('train-stats');
-                train_stats.style.display = "none";
-                const travel_stats = document.getElementById('travel-stats');
-                travel_stats.style.display = "none";
-
+        function showMap(mapId) {
+            const maps = document.getElementsByClassName('map-frame');
+            for (let i = 0; i < maps.length; i++) maps[i].classList.remove('active');
+            const map2 = document.getElementById('map2');
+            map2.style.display = "none";
+            const train_stats = document.getElementById('train-stats');
+            train_stats.style.display = "none";
+            const travel_stats = document.getElementById('travel-stats');
+            travel_stats.style.display = "none";
 
 
 
-                if (mapId === "map2") {
-                    map2.style.display = "flex";
-                    train_stats.style.display = "block";
-                    loadStats();
-                    const ro = new ResizeObserver(() => {
-                        // 合并多次变化，避免频繁 resize
-                        requestAnimationFrame(resizeAllCharts);
-                    });
 
-                    ["rightPane", "dockSlot", "statsHistSlot", "statsScatterSlot", "map2"].forEach(id => {
-                        const el = document.getElementById(id);
-                        if (el) ro.observe(el);
-                    });
-                    drawDepartChart();
-                    drawArriveChart();
-                } else {
-                    document.getElementById(mapId).classList.add('active');
-                };
-                if (mapId === "map1") {
-                    travel_stats.style.display = "block";
-                    loadStats_map1();
-                };
+            if (mapId === "map2") {
+                map2.style.display = "flex";
+                train_stats.style.display = "block";
+                loadStats();
+                const ro = new ResizeObserver(() => {
+                    // 合并多次变化，避免频繁 resize
+                    requestAnimationFrame(resizeAllCharts);
+                });
 
-            }
-
-            document.addEventListener('DOMContentLoaded', () => {
-                document.getElementById('travel-stats').style.display = 'block';
+                ["rightPane", "dockSlot", "statsHistSlot", "statsScatterSlot", "map2"].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) ro.observe(el);
+                });
+                drawDepartChart();
+                drawArriveChart();
+            } else {
+                document.getElementById(mapId).classList.add('active');
+            };
+            if (mapId === "map1") {
+                travel_stats.style.display = "block";
                 loadStats_map1();
-            });
+            };
 
-            async function loadStats_map1() {
-                const chartsData = await (await fetch("data/charts.json")).json();
-                drawCityCountChart(chartsData.citycount)
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('travel-stats').style.display = 'block';
+            loadStats_map1();
+        });
+
+        async function loadStats_map1() {
+            const chartsData = await (await fetch("data/charts.json")).json();
+            drawCityCountChart(chartsData.citycount)
+        }
+
+        function drawCityCountChart(data) {
+            const canvas = document.getElementById('CityCount');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
             }
 
-            function drawCityCountChart(data) {
-                const canvas = document.getElementById('CityCount');
-                if (!canvas) {
-                    console.error('Canvas element not found');
-                    return;
+
+            const ctx = canvas.getContext('2d');
+            if (window.CityCount instanceof Chart) {
+                window.CityCount.destroy();
+            }
+            const container = document.getElementById('CityCountSlot');
+
+            let alreadyContainer = document.getElementById('button-container');
+
+            if (alreadyContainer) {
+                alreadyContainer.remove();
+            }
+            // 创建按钮容器
+            const buttonContainer = document.createElement('div');
+            buttonContainer.style.position = 'relative';
+            buttonContainer.style.display = 'flex';
+            buttonContainer.style.justifyContent = 'center';
+            buttonContainer.style.alignItems = 'center';
+            buttonContainer.style.marginTop = '10px';
+            buttonContainer.style.gap = '20px';
+            buttonContainer.id = 'button-container'
+
+            // 创建左移按钮
+            const leftButton = document.createElement('button');
+            leftButton.innerHTML = '← Prev';
+            leftButton.style.padding = '8px 20px';
+            leftButton.style.fontSize = '14px';
+            leftButton.style.cursor = 'pointer';
+            leftButton.style.backgroundColor = '#3b82f6';
+            leftButton.style.color = 'white';
+            leftButton.style.border = 'none';
+            leftButton.style.borderRadius = '5px';
+            leftButton.style.transition = 'background-color 0.3s';
+
+            // 创建右移按钮
+            const rightButton = document.createElement('button');
+            rightButton.innerHTML = 'Next →';
+            rightButton.style.padding = '8px 20px';
+            rightButton.style.fontSize = '14px';
+            rightButton.style.cursor = 'pointer';
+            rightButton.style.backgroundColor = '#3b82f6';
+            rightButton.style.color = 'white';
+            rightButton.style.border = 'none';
+            rightButton.style.borderRadius = '5px';
+            rightButton.style.transition = 'background-color 0.3s';
+
+            // 添加悬停效果
+            leftButton.onmouseover = () => leftButton.style.backgroundColor = '#2563eb';
+            leftButton.onmouseout = () => leftButton.style.backgroundColor = '#3b82f6';
+            rightButton.onmouseover = () => rightButton.style.backgroundColor = '#2563eb';
+            rightButton.onmouseout = () => rightButton.style.backgroundColor = '#3b82f6';
+
+            // 创建位置指示器
+            const positionIndicator = document.createElement('span');
+            positionIndicator.style.fontSize = '14px';
+            positionIndicator.style.color = '#666';
+            positionIndicator.style.margin = '0 10px';
+
+            buttonContainer.appendChild(leftButton);
+            buttonContainer.appendChild(positionIndicator);
+            buttonContainer.appendChild(rightButton);
+
+            // 将按钮容器添加到CityCountSlot后面
+            container.parentNode.insertBefore(buttonContainer, container.nextSibling);
+
+            // 验证数据
+            if (!data || typeof data !== 'object') {
+                console.error('Invalid data: data is null or not an object', data);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.font = '14px Arial';
+                ctx.fillStyle = '#666';
+                ctx.textAlign = 'center';
+                ctx.fillText('no data error', canvas.width / 2, canvas.height / 2);
+                return;
+            }
+
+            // 存储原始数据和处理后的数据
+            let originalData = data;
+            let currentVisibleDatasets = {
+                on: true,
+                off: true
+            };
+
+            // 当前滚动位置（单位：城市索引）
+            let currentScrollIndex = 0;
+            const VISIBLE_CITIES = 15; // 一次显示的城市数量
+
+            // 配置常量
+            const CHART_HEIGHT = 450;
+            const BAR_WIDTH = 80;           // 每个类别占用的总宽度（像素）
+            const BAR_PERCENTAGE = 0.7;      // 柱子占类别宽度的比例
+
+            // 设置canvas尺寸适应容器
+            const resizeCanvas = () => {
+                const containerWidth = container.clientWidth || 800;
+
+                canvas.width = containerWidth;
+                canvas.height = CHART_HEIGHT;
+                container.style.height = CHART_HEIGHT + 'px';
+
+                if (window.cityChart) {
+                    updateChart();
                 }
-                
+            };
 
-                const ctx = canvas.getContext('2d');
-                if (window.CityCount instanceof Chart) {
-                    window.CityCount.destroy();
-                }
-                const container = document.getElementById('CityCountSlot');
-
-                let alreadyContainer = document.getElementById('button-container');
-
-                if (alreadyContainer) {
-                    alreadyContainer.remove();
-                }
-                // 创建按钮容器
-                const buttonContainer = document.createElement('div');
-                buttonContainer.style.position = 'relative';
-                buttonContainer.style.display = 'flex';
-                buttonContainer.style.justifyContent = 'center';
-                buttonContainer.style.alignItems = 'center';
-                buttonContainer.style.marginTop = '10px';
-                buttonContainer.style.gap = '20px';
-                buttonContainer.id = 'button-container'
-
-                // 创建左移按钮
-                const leftButton = document.createElement('button');
-                leftButton.innerHTML = '← Prev';
-                leftButton.style.padding = '8px 20px';
-                leftButton.style.fontSize = '14px';
-                leftButton.style.cursor = 'pointer';
-                leftButton.style.backgroundColor = '#3b82f6';
-                leftButton.style.color = 'white';
-                leftButton.style.border = 'none';
-                leftButton.style.borderRadius = '5px';
-                leftButton.style.transition = 'background-color 0.3s';
-
-                // 创建右移按钮
-                const rightButton = document.createElement('button');
-                rightButton.innerHTML = 'Next →';
-                rightButton.style.padding = '8px 20px';
-                rightButton.style.fontSize = '14px';
-                rightButton.style.cursor = 'pointer';
-                rightButton.style.backgroundColor = '#3b82f6';
-                rightButton.style.color = 'white';
-                rightButton.style.border = 'none';
-                rightButton.style.borderRadius = '5px';
-                rightButton.style.transition = 'background-color 0.3s';
-
-                // 添加悬停效果
-                leftButton.onmouseover = () => leftButton.style.backgroundColor = '#2563eb';
-                leftButton.onmouseout = () => leftButton.style.backgroundColor = '#3b82f6';
-                rightButton.onmouseover = () => rightButton.style.backgroundColor = '#2563eb';
-                rightButton.onmouseout = () => rightButton.style.backgroundColor = '#3b82f6';
-
-                // 创建位置指示器
-                const positionIndicator = document.createElement('span');
-                positionIndicator.style.fontSize = '14px';
-                positionIndicator.style.color = '#666';
-                positionIndicator.style.margin = '0 10px';
-
-                buttonContainer.appendChild(leftButton);
-                buttonContainer.appendChild(positionIndicator);
-                buttonContainer.appendChild(rightButton);
-
-                // 将按钮容器添加到CityCountSlot后面
-                container.parentNode.insertBefore(buttonContainer, container.nextSibling);
-
-                // 验证数据
-                if (!data || typeof data !== 'object') {
-                    console.error('Invalid data: data is null or not an object', data);
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    ctx.font = '14px Arial';
-                    ctx.fillStyle = '#666';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('no data error', canvas.width / 2, canvas.height / 2);
-                    return;
-                }
-
-                // 存储原始数据和处理后的数据
-                let originalData = data;
-                let currentVisibleDatasets = {
-                    on: true,
-                    off: true
-                };
-
-                // 当前滚动位置（单位：城市索引）
-                let currentScrollIndex = 0;
-                const VISIBLE_CITIES = 15; // 一次显示的城市数量
-
-                // 配置常量
-                const CHART_HEIGHT = 450;
-                const BAR_WIDTH = 80;           // 每个类别占用的总宽度（像素）
-                const BAR_PERCENTAGE = 0.7;      // 柱子占类别宽度的比例
-
-                // 设置canvas尺寸适应容器
-                const resizeCanvas = () => {
-                    const containerWidth = container.clientWidth || 800;
-
-                    canvas.width = containerWidth;
-                    canvas.height = CHART_HEIGHT;
-                    container.style.height = CHART_HEIGHT + 'px';
-
-                    if (window.cityChart) {
-                        updateChart();
-                    }
-                };
-
-                // 数据处理：根据当前可见的数据集重新排序
-                const processData = (rawData) => {
-                    try {
-                        const cityDataArray = Object.entries(rawData)
-                            .map(([city, values]) => {
-                                if (!values || typeof values !== 'object') {
-                                    console.warn(`Invalid data for city: ${city}`, values);
-                                    return null;
-                                }
-
-                                const on = Number(values.on) || 0;
-                                const off = Number(values.off) || 0;
-                                const total = Number(values.total) || (on + off);
-
-                                return {
-                                    city: String(city),
-                                    on: on,
-                                    off: off,
-                                    total: total
-                                };
-                            })
-                            .filter(item => item !== null);
-
-                        cityDataArray.forEach(item => {
-                            let visibleTotal = 0;
-                            if (currentVisibleDatasets.on) visibleTotal += item.on;
-                            if (currentVisibleDatasets.off) visibleTotal += item.off;
-                            item.sortValue = visibleTotal;
-                        });
-
-                        return cityDataArray.sort((a, b) => {
-                            if (a.sortValue === 0 && b.sortValue === 0) {
-                                return b.total - a.total;
+            // 数据处理：根据当前可见的数据集重新排序
+            const processData = (rawData) => {
+                try {
+                    const cityDataArray = Object.entries(rawData)
+                        .map(([city, values]) => {
+                            if (!values || typeof values !== 'object') {
+                                console.warn(`Invalid data for city: ${city}`, values);
+                                return null;
                             }
-                            return b.sortValue - a.sortValue;
-                        });
-                    } catch (error) {
-                        console.error('Error processing data:', error);
-                        return [];
-                    }
-                };
 
-                // 获取当前可见的数据切片
-                const getVisibleData = (fullData) => {
-                    const start = currentScrollIndex;
-                    const end = Math.min(start + VISIBLE_CITIES, fullData.length);
-                    return fullData.slice(start, end);
-                };
+                            const on = Number(values.on) || 0;
+                            const off = Number(values.off) || 0;
+                            const total = Number(values.total) || (on + off);
+
+                            return {
+                                city: String(city),
+                                on: on,
+                                off: off,
+                                total: total
+                            };
+                        })
+                        .filter(item => item !== null);
+
+                    cityDataArray.forEach(item => {
+                        let visibleTotal = 0;
+                        if (currentVisibleDatasets.on) visibleTotal += item.on;
+                        if (currentVisibleDatasets.off) visibleTotal += item.off;
+                        item.sortValue = visibleTotal;
+                    });
+
+                    return cityDataArray.sort((a, b) => {
+                        if (a.sortValue === 0 && b.sortValue === 0) {
+                            return b.total - a.total;
+                        }
+                        return b.sortValue - a.sortValue;
+                    });
+                } catch (error) {
+                    console.error('Error processing data:', error);
+                    return [];
+                }
+            };
+
+            // 获取当前可见的数据切片
+            const getVisibleData = (fullData) => {
+                const start = currentScrollIndex;
+                const end = Math.min(start + VISIBLE_CITIES, fullData.length);
+                return fullData.slice(start, end);
+            };
+
+            // 计算当前可见数据的最大值
+            const getCurrentMaxValue = (visibleData) => {
+                let maxValue = 0;
+                visibleData.forEach(item => {
+                    let Value = 0;
+                    if (currentVisibleDatasets.on) Value += item.on;
+                    if (currentVisibleDatasets.off) Value += item.off;
+                    maxValue = Math.max(maxValue, Value);
+                });
+                return maxValue;
+            };
+
+            // 更新位置指示器
+            const updatePositionIndicator = (totalCities) => {
+                const endIndex = Math.min(currentScrollIndex + VISIBLE_CITIES, totalCities);
+                positionIndicator.textContent = `Showing ${currentScrollIndex + 1}-${endIndex} /  ${totalCities} cities in total`;
+
+                // 更新按钮状态
+                leftButton.disabled = currentScrollIndex === 0;
+                rightButton.disabled = endIndex >= totalCities;
+
+                leftButton.style.opacity = leftButton.disabled ? '0.5' : '1';
+                leftButton.style.cursor = leftButton.disabled ? 'not-allowed' : 'pointer';
+                rightButton.style.opacity = rightButton.disabled ? '0.5' : '1';
+                rightButton.style.cursor = rightButton.disabled ? 'not-allowed' : 'pointer';
+            };
+
+            // 移动视图
+            const moveView = (direction) => {
+                const processedData = processData(originalData);
+                const maxStartIndex = Math.max(0, processedData.length - VISIBLE_CITIES);
+
+                if (direction === 'left') {
+                    currentScrollIndex = Math.max(0, currentScrollIndex - 1);
+                } else {
+                    currentScrollIndex = Math.min(maxStartIndex, currentScrollIndex + 1);
+                }
+
+                // 重新绘制图表
+                redrawWithVisibleData(processedData);
+                updatePositionIndicator(processedData.length);
+            };
+
+            // 使用可见数据重新绘制
+            const redrawWithVisibleData = (fullData) => {
+                const visibleData = getVisibleData(fullData);
+                const cities = visibleData.map(item => item.city);
+                const onData = visibleData.map(item => item.on);
+                const offData = visibleData.map(item => item.off);
 
                 // 计算当前可见数据的最大值
-                const getCurrentMaxValue = (visibleData) => {
-                    let maxValue = 0;
-                    visibleData.forEach(item => {
-                        let Value = 0;
-                        if (currentVisibleDatasets.on) Value += item.on;
-                        if (currentVisibleDatasets.off) Value += item.off;
-                        maxValue = Math.max(maxValue, Value);
-                    });
-                    return maxValue;
-                };
+                const currentMaxValue = getCurrentMaxValue(visibleData);
+                // 设置y轴最大值（向上取整到10的倍数再加10）
+                const yAxisMax = Math.ceil(currentMaxValue / 10) * 10;
 
-                // 更新位置指示器
-                const updatePositionIndicator = (totalCities) => {
-                    const endIndex = Math.min(currentScrollIndex + VISIBLE_CITIES, totalCities);
-                    positionIndicator.textContent = `Showing ${currentScrollIndex + 1}-${endIndex} /  ${totalCities} cities in total`;
+                if (window.cityChart) {
+                    window.cityChart.data.labels = cities;
+                    window.cityChart.data.datasets[0].data = onData;
+                    window.cityChart.data.datasets[1].data = offData;
 
-                    // 更新按钮状态
-                    leftButton.disabled = currentScrollIndex === 0;
-                    rightButton.disabled = endIndex >= totalCities;
+                    // 动态更新y轴范围
+                    window.cityChart.options.scales.y.max = yAxisMax;
 
-                    leftButton.style.opacity = leftButton.disabled ? '0.5' : '1';
-                    leftButton.style.cursor = leftButton.disabled ? 'not-allowed' : 'pointer';
-                    rightButton.style.opacity = rightButton.disabled ? '0.5' : '1';
-                    rightButton.style.cursor = rightButton.disabled ? 'not-allowed' : 'pointer';
-                };
+                    window.cityChart.update();
+                }
+            };
 
-                // 移动视图
-                const moveView = (direction) => {
+            // 按钮点击事件
+            leftButton.onclick = () => moveView('left');
+            rightButton.onclick = () => moveView('right');
+
+            // 更新图表
+            const updateChart = () => {
+                try {
                     const processedData = processData(originalData);
-                    const maxStartIndex = Math.max(0, processedData.length - VISIBLE_CITIES);
 
-                    if (direction === 'left') {
-                        currentScrollIndex = Math.max(0, currentScrollIndex - 1);
-                    } else {
-                        currentScrollIndex = Math.min(maxStartIndex, currentScrollIndex + 1);
+                    if (processedData.length === 0) {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.font = '14px Arial';
+                        ctx.fillStyle = '#666';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('no cities error', canvas.width / 2, canvas.height / 2);
+                        return;
                     }
 
-                    // 重新绘制图表
-                    redrawWithVisibleData(processedData);
-                    updatePositionIndicator(processedData.length);
-                };
+                    // 重置滚动位置
+                    currentScrollIndex = 0;
 
-                // 使用可见数据重新绘制
-                const redrawWithVisibleData = (fullData) => {
-                    const visibleData = getVisibleData(fullData);
+                    // 获取可见数据
+                    const visibleData = getVisibleData(processedData);
                     const cities = visibleData.map(item => item.city);
                     const onData = visibleData.map(item => item.on);
                     const offData = visibleData.map(item => item.off);
@@ -620,984 +663,1132 @@
                     // 计算当前可见数据的最大值
                     const currentMaxValue = getCurrentMaxValue(visibleData);
                     // 设置y轴最大值（向上取整到10的倍数再加10）
-                    const yAxisMax = Math.ceil(currentMaxValue / 10) * 10;
+                    const yAxisMax = Math.ceil(currentMaxValue / 10) * 10 + 10;
 
                     if (window.cityChart) {
                         window.cityChart.data.labels = cities;
                         window.cityChart.data.datasets[0].data = onData;
                         window.cityChart.data.datasets[1].data = offData;
+                        window.cityChart.data.datasets[0].hidden = !currentVisibleDatasets.on;
+                        window.cityChart.data.datasets[1].hidden = !currentVisibleDatasets.off;
 
                         // 动态更新y轴范围
                         window.cityChart.options.scales.y.max = yAxisMax;
 
                         window.cityChart.update();
-                    }
-                };
-
-                // 按钮点击事件
-                leftButton.onclick = () => moveView('left');
-                rightButton.onclick = () => moveView('right');
-
-                // 更新图表
-                const updateChart = () => {
-                    try {
-                        const processedData = processData(originalData);
-
-                        if (processedData.length === 0) {
-                            ctx.clearRect(0, 0, canvas.width, canvas.height);
-                            ctx.font = '14px Arial';
-                            ctx.fillStyle = '#666';
-                            ctx.textAlign = 'center';
-                            ctx.fillText('no cities error', canvas.width / 2, canvas.height / 2);
-                            return;
-                        }
-
-                        // 重置滚动位置
-                        currentScrollIndex = 0;
-
-                        // 获取可见数据
-                        const visibleData = getVisibleData(processedData);
-                        const cities = visibleData.map(item => item.city);
-                        const onData = visibleData.map(item => item.on);
-                        const offData = visibleData.map(item => item.off);
-
-                        // 计算当前可见数据的最大值
-                        const currentMaxValue = getCurrentMaxValue(visibleData);
-                        // 设置y轴最大值（向上取整到10的倍数再加10）
-                        const yAxisMax = Math.ceil(currentMaxValue / 10) * 10 + 10;
-
-                        if (window.cityChart) {
-                            window.cityChart.data.labels = cities;
-                            window.cityChart.data.datasets[0].data = onData;
-                            window.cityChart.data.datasets[1].data = offData;
-                            window.cityChart.data.datasets[0].hidden = !currentVisibleDatasets.on;
-                            window.cityChart.data.datasets[1].hidden = !currentVisibleDatasets.off;
-
-                            // 动态更新y轴范围
-                            window.cityChart.options.scales.y.max = yAxisMax;
-
-                            window.cityChart.update();
-                        } else {
-                            window.cityChart = new Chart(ctx, {
-                                type: 'bar',
-                                data: {
-                                    labels: cities,
-                                    datasets: [
-                                        {
-                                            label: 'departure',
-                                            data: onData,
-                                            backgroundColor: '#f97316',
-                                            borderColor: '#f97316',
-                                            borderWidth: 1,
-                                            stack: 'total',
-                                            order: 1,
-                                            hidden: !currentVisibleDatasets.on,
-                                            barPercentage: BAR_PERCENTAGE,
-                                            categoryPercentage: 0.9,
-                                        },
-                                        {
-                                            label: 'arrival',
-                                            data: offData,
-                                            backgroundColor: '#3b82f6',
-                                            borderColor: '#3b82f6',
-                                            borderWidth: 1,
-                                            stack: 'total',
-                                            order: 2,
-                                            hidden: !currentVisibleDatasets.off,
-                                            barPercentage: BAR_PERCENTAGE,
-                                            categoryPercentage: 0.9,
-                                        }
-                                    ]
+                    } else {
+                        window.cityChart = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: cities,
+                                datasets: [
+                                    {
+                                        label: 'departure',
+                                        data: onData,
+                                        backgroundColor: '#f97316',
+                                        borderColor: '#f97316',
+                                        borderWidth: 1,
+                                        stack: 'total',
+                                        order: 1,
+                                        hidden: !currentVisibleDatasets.on,
+                                        barPercentage: BAR_PERCENTAGE,
+                                        categoryPercentage: 0.9,
+                                    },
+                                    {
+                                        label: 'arrival',
+                                        data: offData,
+                                        backgroundColor: '#3b82f6',
+                                        borderColor: '#3b82f6',
+                                        borderWidth: 1,
+                                        stack: 'total',
+                                        order: 2,
+                                        hidden: !currentVisibleDatasets.off,
+                                        barPercentage: BAR_PERCENTAGE,
+                                        categoryPercentage: 0.9,
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                layout: {
+                                    padding: {
+                                        left: 10,
+                                        right: 10
+                                    }
                                 },
-                                options: {
-                                    responsive: true,
-                                    maintainAspectRatio: false,
-                                    layout: {
-                                        padding: {
-                                            left: 10,
-                                            right: 10
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: `Urban Travel Statistics - Departure / Arrival Counts (for a total of ${processedData.length} cities)`,
+                                        font: { size: 16, weight: 'bold' },
+                                        padding: { top: 10, bottom: 20 }
+                                    },
+                                    legend: {
+                                        display: true,
+                                        position: 'top',
+                                        labels: { usePointStyle: true, padding: 15 },
+                                        onClick: (e, legendItem, legend) => {
+                                            const index = legendItem.datasetIndex;
+                                            const chart = legend.chart;
+
+                                            if (index === 0) {
+                                                currentVisibleDatasets.on = !currentVisibleDatasets.on;
+                                            } else if (index === 1) {
+                                                currentVisibleDatasets.off = !currentVisibleDatasets.off;
+                                            }
+
+                                            const newProcessedData = processData(originalData);
+
+                                            // 重置滚动位置
+                                            currentScrollIndex = 0;
+
+                                            // 更新可见数据
+                                            const newVisibleData = getVisibleData(newProcessedData);
+                                            const newCities = newVisibleData.map(item => item.city);
+                                            const newOnData = newVisibleData.map(item => item.on);
+                                            const newOffData = newVisibleData.map(item => item.off);
+
+                                            // 计算新的最大值并更新y轴
+                                            const newMaxValue = getCurrentMaxValue(newVisibleData);
+                                            chart.options.scales.y.max = Math.ceil(newMaxValue / 10) * 10 + 10;
+
+                                            chart.data.labels = newCities;
+                                            chart.data.datasets[0].data = newOnData;
+                                            chart.data.datasets[1].data = newOffData;
+                                            chart.data.datasets[0].hidden = !currentVisibleDatasets.on;
+                                            chart.data.datasets[1].hidden = !currentVisibleDatasets.off;
+
+                                            // 更新标题
+                                            chart.options.plugins.title.text = `Urban Travel Statistics - Departure / Arrival Counts (for a total of ${newProcessedData.length} cities)`;
+
+                                            chart.update();
+
+                                            // 更新位置指示器
+                                            updatePositionIndicator(newProcessedData.length);
+
+                                            return false;
                                         }
                                     },
-                                    plugins: {
+                                    tooltip: {
+                                        callbacks: {
+                                            footer: (tooltipItems) => {
+                                                const stack = tooltipItems[0]?.parsed?._stacks?.y;
+                                                if (stack) {
+                                                    const total = Object.values(stack)[0] + Object.values(stack)[1];
+                                                    return `total: ${total}`;
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    x: {
+                                        stacked: true,
+                                        grid: { display: false },
+                                        ticks: {
+                                            font: { size: 12, weight: '500' },
+                                            maxRotation: 45,
+                                            minRotation: 45,
+                                            autoSkip: false,
+                                        }
+                                    },
+                                    y: {
+                                        stacked: true,
+                                        beginAtZero: true,
+                                        max: yAxisMax, // 设置初始最大值
                                         title: {
                                             display: true,
-                                            text: `Urban Travel Statistics - Departure / Arrival Counts (for a total of ${processedData.length} cities)`,
-                                            font: { size: 16, weight: 'bold' },
-                                            padding: { top: 10, bottom: 20 }
+                                            text: '次数',
+                                            font: { size: 13, weight: '500' }
                                         },
-                                        legend: {
-                                            display: true,
-                                            position: 'top',
-                                            labels: { usePointStyle: true, padding: 15 },
-                                            onClick: (e, legendItem, legend) => {
-                                                const index = legendItem.datasetIndex;
-                                                const chart = legend.chart;
-
-                                                if (index === 0) {
-                                                    currentVisibleDatasets.on = !currentVisibleDatasets.on;
-                                                } else if (index === 1) {
-                                                    currentVisibleDatasets.off = !currentVisibleDatasets.off;
-                                                }
-
-                                                const newProcessedData = processData(originalData);
-
-                                                // 重置滚动位置
-                                                currentScrollIndex = 0;
-
-                                                // 更新可见数据
-                                                const newVisibleData = getVisibleData(newProcessedData);
-                                                const newCities = newVisibleData.map(item => item.city);
-                                                const newOnData = newVisibleData.map(item => item.on);
-                                                const newOffData = newVisibleData.map(item => item.off);
-
-                                                // 计算新的最大值并更新y轴
-                                                const newMaxValue = getCurrentMaxValue(newVisibleData);
-                                                chart.options.scales.y.max = Math.ceil(newMaxValue / 10) * 10 + 10;
-
-                                                chart.data.labels = newCities;
-                                                chart.data.datasets[0].data = newOnData;
-                                                chart.data.datasets[1].data = newOffData;
-                                                chart.data.datasets[0].hidden = !currentVisibleDatasets.on;
-                                                chart.data.datasets[1].hidden = !currentVisibleDatasets.off;
-
-                                                // 更新标题
-                                                chart.options.plugins.title.text = `Urban Travel Statistics - Departure / Arrival Counts (for a total of ${newProcessedData.length} cities)`;
-
-                                                chart.update();
-
-                                                // 更新位置指示器
-                                                updatePositionIndicator(newProcessedData.length);
-
-                                                return false;
-                                            }
-                                        },
-                                        tooltip: {
-                                            callbacks: {
-                                                footer: (tooltipItems) => {
-                                                    const stack = tooltipItems[0]?.parsed?._stacks?.y;
-                                                    if (stack) {
-                                                        const total = Object.values(stack)[0] + Object.values(stack)[1];
-                                                        return `total: ${total}`;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    },
-                                    scales: {
-                                        x: {
-                                            stacked: true,
-                                            grid: { display: false },
-                                            ticks: {
-                                                font: { size: 12, weight: '500' },
-                                                maxRotation: 45,
-                                                minRotation: 45,
-                                                autoSkip: false,
-                                            }
-                                        },
-                                        y: {
-                                            stacked: true,
-                                            beginAtZero: true,
-                                            max: yAxisMax, // 设置初始最大值
-                                            title: {
-                                                display: true,
-                                                text: '次数',
-                                                font: { size: 13, weight: '500' }
-                                            },
-                                            ticks: {
-                                                stepSize: 5,
-                                                font: { size: 12 },
-                                                callback: function (value) {
-                                                    return value;
-                                                }
+                                        ticks: {
+                                            stepSize: 5,
+                                            font: { size: 12 },
+                                            callback: function (value) {
+                                                return value;
                                             }
                                         }
                                     }
                                 }
-                            });
-                        }
-
-                        // 更新位置指示器
-                        updatePositionIndicator(processedData.length);
-
-                    } catch (error) {
-                        console.error('Error updating chart:', error);
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        ctx.font = '14px Arial';
-                        ctx.fillStyle = '#f00';
-                        ctx.textAlign = 'center';
-                        ctx.fillText('图表更新失败', canvas.width / 2, canvas.height / 2);
+                            }
+                        });
                     }
-                };
 
-                // 初始化尺寸和绘图
+                    // 更新位置指示器
+                    updatePositionIndicator(processedData.length);
+
+                } catch (error) {
+                    console.error('Error updating chart:', error);
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.font = '14px Arial';
+                    ctx.fillStyle = '#f00';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('图表更新失败', canvas.width / 2, canvas.height / 2);
+                }
+            };
+
+            // 初始化尺寸和绘图
+            resizeCanvas();
+            updateChart();
+
+            window.addEventListener('resize', () => {
                 resizeCanvas();
-                updateChart();
+            });
 
-                window.addEventListener('resize', () => {
-                    resizeCanvas();
-                });
+            return window.cityChart;
+        }
 
-                return window.cityChart;
+        async function loadStats() {
+            const statsData = await (await fetch("data/stats.json")).json();
+            const chartsData = await (await fetch("data/charts.json")).json();
+
+            fillBasicStats(statsData);
+            drawHistogram(chartsData.durations, chartsData.distances);
+            drawScatterChart();
+            showDockedChart("hist");
+            showDockedChart("scatter");
+            requestAnimationFrame(resizeAllCharts);
+
+        }
+
+        function fillBasicStats(data) {
+            document.getElementById("stats-basic").innerHTML = `
+                                            <div><b>Total Trips: </b> ${data.total_trips}</div>
+                                            <div><b>Total Time: </b> ${data.total_time}</div>
+                                            <div><b>Total Distance: </b> ${data.total_distance}</div>
+                                            <div><b>Overnight Trips: </b> ${data.overnight_trips}</div>
+                                            <div><b>Longest Trip: </b> ${data.longest_trip.train} ${data.longest_trip.from}→${data.longest_trip.to}（${data.longest_trip.duration}）</div>
+                                            <div><b>Shortest Trip: </b> ${data.shortest_trip.train} ${data.shortest_trip.from}→${data.shortest_trip.to}（${data.shortest_trip.duration}）</div>
+                                            <div><b>Farest Trip: </b> ${data.farest_trip.train} ${data.farest_trip.from}→${data.farest_trip.to}（${data.farest_trip.distance}）</div>
+                                            <div><b>Nearest Trip: </b> ${data.nearest_trip.train} ${data.nearest_trip.from}→${data.nearest_trip.to}（${data.nearest_trip.distance}）</div>
+                                            <div><b>Fastest Trip: </b> ${data.fastest_trip.train} ${data.fastest_trip.from}→${data.fastest_trip.to}（${data.fastest_trip.rate}）</div>
+                                            <div><b>Fastest Trip: </b> ${data.slowest_trip.train} ${data.slowest_trip.from}→${data.slowest_trip.to}（${data.slowest_trip.rate}）</div>
+                                            <div><b>Northernmost Station: </b> ${data.northernmost.name} (${data.northernmost.lat.toFixed(2)},${data.northernmost.lng.toFixed(2)}）</div>
+                                            <div><b>Southernmost Station: </b> ${data.southernmost.name} (${data.southernmost.lat.toFixed(2)},${data.southernmost.lng.toFixed(2)}）</div>
+                                            <div><b>Easternmost Station: </b> ${data.easternmost.name} (${data.easternmost.lat.toFixed(2)},${data.easternmost.lng.toFixed(2)}）</div>
+                                            <div><b>Westernmost Station: </b> ${data.westernmost.name} (${data.westernmost.lat.toFixed(2)},${data.westernmost.lng.toFixed(2)}）</div>
+                                        `;
+        }
+
+        async function drawDepartChart() {
+            const chartsData = await (await fetch("data/charts.json")).json();
+
+            const hours = chartsData.depart_hours;  // 整数小时分布用
+
+            // -------------------------
+            // 1. 转换外部给定最早/最晚时间（含分钟）
+            // -------------------------
+            function convertHMToFloat(hm) {
+                const [h, m] = hm.split(":").map(Number);
+                return h + m / 60 - 0.5;
             }
-        
-            async function loadStats() {
-                const statsData = await (await fetch("data/stats.json")).json();
-                const chartsData = await (await fetch("data/charts.json")).json();
 
-                fillBasicStats(statsData);
-                drawHistogram(chartsData.durations, chartsData.distances);
-                drawScatterChart();
-                showDockedChart("hist");
-                showDockedChart("scatter");
-                requestAnimationFrame(resizeAllCharts);
+            const earliestFloat = convertHMToFloat(chartsData.earliestdep.time);
+            const latestFloat = convertHMToFloat(chartsData.latestdep.time);
 
+            // -------------------------
+            // 2. 整点小时分布 bins (0~23)
+            // --------------------------
+            const bins = new Array(24).fill(0);
+            hours.forEach(h => {
+                if (h >= 0 && h < 24) bins[h]++;
+            });
+
+            // -------------------------
+            // 3. 绘图
+            // -------------------------
+            const ctx = document.getElementById("departChart").getContext("2d");
+
+            if (window.departChart instanceof Chart) {
+                window.departChart.destroy();
             }
 
-            function fillBasicStats(data) {
-                document.getElementById("stats-basic").innerHTML = `
-                            <div><b>Total Trips: </b> ${data.total_trips}</div>
-                            <div><b>Total Time: </b> ${data.total_time}</div>
-                            <div><b>Total Distance: </b> ${data.total_distance}</div>
-                            <div><b>Overnight Trips: </b> ${data.overnight_trips}</div>
-                            <div><b>Longest Trip: </b> ${data.longest_trip.train} ${data.longest_trip.from}→${data.longest_trip.to}（${data.longest_trip.duration}）</div>
-                            <div><b>Shortest Trip: </b> ${data.shortest_trip.train} ${data.shortest_trip.from}→${data.shortest_trip.to}（${data.shortest_trip.duration}）</div>
-                            <div><b>Farest Trip: </b> ${data.farest_trip.train} ${data.farest_trip.from}→${data.farest_trip.to}（${data.farest_trip.distance}）</div>
-                            <div><b>Nearest Trip: </b> ${data.nearest_trip.train} ${data.nearest_trip.from}→${data.nearest_trip.to}（${data.nearest_trip.distance}）</div>
-                            <div><b>Fastest Trip: </b> ${data.fastest_trip.train} ${data.fastest_trip.from}→${data.fastest_trip.to}（${data.fastest_trip.rate}）</div>
-                            <div><b>Fastest Trip: </b> ${data.slowest_trip.train} ${data.slowest_trip.from}→${data.slowest_trip.to}（${data.slowest_trip.rate}）</div>
-                            <div><b>Northernmost Station: </b> ${data.northernmost.name} (${data.northernmost.lat.toFixed(2)},${data.northernmost.lng.toFixed(2) }）</div>
-                            <div><b>Southernmost Station: </b> ${data.southernmost.name} (${data.southernmost.lat.toFixed(2)},${data.southernmost.lng.toFixed(2) }）</div>
-                            <div><b>Easternmost Station: </b> ${data.easternmost.name} (${data.easternmost.lat.toFixed(2)},${data.easternmost.lng.toFixed(2) }）</div>
-                            <div><b>Westernmost Station: </b> ${data.westernmost.name} (${data.westernmost.lat.toFixed(2)},${data.westernmost.lng.toFixed(2) }）</div>
-                        `;
-            }
-
-            async function drawDepartChart() {
-                const chartsData = await (await fetch("data/charts.json")).json();
-
-                const hours = chartsData.depart_hours;  // 整数小时分布用
-
-                // -------------------------
-                // 1. 转换外部给定最早/最晚时间（含分钟）
-                // -------------------------
-                function convertHMToFloat(hm) {
-                    const [h, m] = hm.split(":").map(Number);
-                    return h + m / 60 - 0.5;
-                }
-
-                const earliestFloat = convertHMToFloat(chartsData.earliestdep.time);
-                const latestFloat = convertHMToFloat(chartsData.latestdep.time);
-
-                // -------------------------
-                // 2. 整点小时分布 bins (0~23)
-                // --------------------------
-                const bins = new Array(24).fill(0);
-                hours.forEach(h => {
-                    if (h >= 0 && h < 24) bins[h]++;
-                });
-
-                // -------------------------
-                // 3. 绘图
-                // -------------------------
-                const ctx = document.getElementById("departChart").getContext("2d");
-
-                if (window.departChart instanceof Chart) {
-                    window.departChart.destroy();
-                }
-
-                window.departChart = new Chart(ctx, {
-                    type: "bar",
-                    data: {
-                        labels: [...Array(24).keys()],  // 0~23
-                        datasets: [{
-                            label: "Departure Count",
-                            data: bins
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            x: {
-                                title: { display: true, text: "Departure Time" },
-                                min: 0,
-                                max: 23
-                            },
-                            y: {
-                                beginAtZero: true,
-                                title: { display: true, text: "Count" }
-                            }
+            window.departChart = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: [...Array(24).keys()],  // 0~23
+                    datasets: [{
+                        label: "Departure Count",
+                        data: bins
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            title: { display: true, text: "Departure Time" },
+                            min: 0,
+                            max: 23
                         },
-                        plugins: {
-                            annotation: {
-                                annotations: {
-                                    earliestLine: {
-                                        type: "line",
-                                        borderColor: "blue",
-                                        borderWidth: 2,
-                                        value: earliestFloat,
-                                        scaleID: "x",
-                                        label: {
-                                            content: [
-                                                `Earliest：${chartsData.earliestdep.time}`,
-                                                `Train：${chartsData.earliestdep.train}`,
-                                                `From：${chartsData.earliestdep.from}`,
-                                                `To：${chartsData.earliestdep.to}`
-                                            ],
-                                            enabled: true,
-                                            position: "start"
-                                        }
-                                    },
-                                    latestLine: {
-                                        type: "line",
-                                        borderColor: "red",
-                                        borderWidth: 2,
-                                        value: latestFloat,
-                                        scaleID: "x",
-                                        label: {
-                                            content: [
-                                                `Latest：${chartsData.latestdep.time}`,
-                                                `Train：${chartsData.latestdep.train}`,
-                                                `From：${chartsData.latestdep.from}`,
-                                                `To：${chartsData.latestdep.to}`
-                                            ],
-                                            enabled: true,
-                                            position: "start"
-                                        }
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: "Count" }
+                        }
+                    },
+                    plugins: {
+                        annotation: {
+                            annotations: {
+                                earliestLine: {
+                                    type: "line",
+                                    borderColor: "blue",
+                                    borderWidth: 2,
+                                    value: earliestFloat,
+                                    scaleID: "x",
+                                    label: {
+                                        content: [
+                                            `Earliest：${chartsData.earliestdep.time}`,
+                                            `Train：${chartsData.earliestdep.train}`,
+                                            `From：${chartsData.earliestdep.from}`,
+                                            `To：${chartsData.earliestdep.to}`
+                                        ],
+                                        enabled: true,
+                                        position: "start"
+                                    }
+                                },
+                                latestLine: {
+                                    type: "line",
+                                    borderColor: "red",
+                                    borderWidth: 2,
+                                    value: latestFloat,
+                                    scaleID: "x",
+                                    label: {
+                                        content: [
+                                            `Latest：${chartsData.latestdep.time}`,
+                                            `Train：${chartsData.latestdep.train}`,
+                                            `From：${chartsData.latestdep.from}`,
+                                            `To：${chartsData.latestdep.to}`
+                                        ],
+                                        enabled: true,
+                                        position: "start"
                                     }
                                 }
                             }
                         }
                     }
-                });
-            }
-
-
-            function hmToFloat(timeStr) {
-                const [h, m] = timeStr.split(":").map(Number);
-                return h + m / 60;
-            }
-
-            function colorForGroup(group) {
-                const predefined = {
-                    G: "rgba(31,119,180,0.65)",
-                    D: "rgba(255,127,14,0.65)",
-                    C: "rgba(44,160,44,0.65)",
-                    S: "rgba(214,39,40,0.65)",
-                    K: "rgba(148,103,189,0.65)",
-                    Z: "rgba(140,86,75,0.65)",
-                    T: "rgba(227,119,194,0.65)",
-                    "数字车次": "rgba(255,152,0,0.65)"
-                };
-
-                if (predefined[group]) return predefined[group];
-
-                // fallback color
-                return "rgba(100,100,100,0.65)";
-            }
-
-
-            function getTrainGroup(train) {
-                if (/^[A-Za-z]/.test(train)) {
-                    return train[0].toUpperCase();   // G / D / C / K / Z / T...
                 }
-                return "数字车次";   // pure number
+            });
+        }
+
+
+        function hmToFloat(timeStr) {
+            const [h, m] = timeStr.split(":").map(Number);
+            return h + m / 60;
+        }
+
+        function colorForGroup(group) {
+            const predefined = {
+                G: "rgba(31,119,180,0.65)",
+                D: "rgba(255,127,14,0.65)",
+                C: "rgba(44,160,44,0.65)",
+                S: "rgba(214,39,40,0.65)",
+                K: "rgba(148,103,189,0.65)",
+                Z: "rgba(140,86,75,0.65)",
+                T: "rgba(227,119,194,0.65)",
+                "数字车次": "rgba(255,152,0,0.65)",
+                "中国铁路广州局": "rgba(31,119,180,0.65)",
+                "中国铁路北京局": "rgba(255,127,14,0.65)",
+                "中国铁路成都局": "rgba(44,160,44,0.65)",
+                "中国铁路武汉局": "rgba(214,39,40,0.65)",
+                "中国铁路南昌局": "rgba(148,103,189,0.65)",
+                "中国铁路太原局": "rgba(140,86,75,0.65)",
+                "香港铁路": "rgba(227,119,194,0.65)",
+                "中国铁路济南局": "rgba(255,152,0,0.65)",
+                "中国铁路上海局": "rgba(0, 128, 128, 0.65)",
+                "中国铁路昆明局": "rgba(255, 99, 71, 0.65)",
+                "珠三角城际": "rgba(123, 104, 238, 0.65)"
+            };
+
+            if (predefined[group]) return predefined[group];
+
+            // fallback color
+            return "rgba(100,100,100,0.65)";
+        }
+
+
+        function getTrainGroup(train) {
+            if (/^[A-Za-z]/.test(train)) {
+                return train[0].toUpperCase();   // G / D / C / K / Z / T...
             }
+            return "数字车次";   // pure number
+        }
 
-            async function drawScatterChart() {
-                const chartsData = await (await fetch("data/charts.json")).json();
-                const rides = chartsData.rides;
+        async function drawScatterChart() {
+            const chartsData = await (await fetch("data/charts.json")).json();
+            const rides = chartsData.rides;
 
-                // 按首字母 / 数字分组
-                const groups = {};
+            // 按首字母 / 数字分组
+            const groups = {};
 
-                rides.forEach(r => {
-                    const group = getTrainGroup(r.train);
+            rides.forEach(r => {
+                const group = getTrainGroup(r.train);
 
-                    if (!groups[group]) groups[group] = [];
+                if (!groups[group]) groups[group] = [];
 
-                    groups[group].push({
-                        x: hmToFloat(r.on),
-                        y: hmToFloat(r.off),
-                        r: Math.max(4, r.duration / 35),
+                groups[group].push({
+                    x: hmToFloat(r.on),
+                    y: hmToFloat(r.off),
+                    r: Math.max(4, r.duration / 35),
 
-                        _ride: r
-                    });
+                    _ride: r
                 });
+            });
 
-                // datasets 建立
-                const datasets = Object.keys(groups).map(group => ({
-                    label: group,
-                    data: groups[group],
-                    backgroundColor: colorForGroup(group),
-                    borderColor: colorForGroup(group),
-                    borderWidth: 1
-                }));
+            // datasets 建立
+            const datasets = Object.keys(groups).map(group => ({
+                label: group,
+                data: groups[group],
+                backgroundColor: colorForGroup(group),
+                borderColor: colorForGroup(group),
+                borderWidth: 1
+            }));
 
-                const ctx = document.getElementById("scatterChart").getContext("2d");
+            const ctx = document.getElementById("scatterChart").getContext("2d");
 
-                if (window.scatterChart instanceof Chart) window.scatterChart.destroy();
+            if (window.scatterChart instanceof Chart) window.scatterChart.destroy();
 
-                window.scatterChart = new Chart(ctx, {
-                    type: "bubble",
-                    data: {
-                        datasets: datasets
+            window.scatterChart = new Chart(ctx, {
+                type: "bubble",
+                data: {
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: "linear",
+                            min: 0,
+                            max: 24,
+                            title: { display: true, text: "departure time" }
+                        },
+                        y: {
+                            type: "linear",
+                            min: 0,
+                            max: 24,
+                            title: { display: true, text: "arrival time" }
+                        }
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            x: {
-                                type: "linear",
-                                min: 0,
-                                max: 24,
-                                title: { display: true, text: "departure time" }
-                            },
-                            y: {
-                                type: "linear",
-                                min: 0,
-                                max: 24,
-                                title: { display: true, text: "arrival time" }
+                    plugins: {
+                        legend: {
+                            position: "right",
+                            labels: {
+                                usePointStyle: true  // 圆点样式更好看
                             }
                         },
-                        plugins: {
-                            legend: {
-                                position: "right",
-                                labels: {
-                                    usePointStyle: true  // 圆点样式更好看
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => {
+                                    const ride = ctx.raw._ride;
+                                    const mapFrame = document.getElementById("mapFrame");
+                                    mapFrame.contentWindow.postMessage({
+                                        type: "highlight_train",
+                                        train: ride.train
+                                    }, "*");
+                                    return `Train:${ride.train} From:${ride.from} To:${ride.to} on:${ride.on} off:${ride.off} duration:${ride.duration}min`;
                                 }
+                            }
+                        },
+                        zoom: {
+                            zoom: {
+                                wheel: {
+                                    enabled: true,  // 启用鼠标滚轮缩放
+                                    speed: 0.2      // 缩放速度
+                                },
+                                pinch: {
+                                    enabled: true    // 触摸板手势缩放
+                                },
+                                mode: 'xy',          // 同时在x和y方向缩放
                             },
-                            tooltip: {
-                                callbacks: {
-                                    label: ctx => {
-                                        const ride = ctx.raw._ride;
-                                        const mapFrame = document.getElementById("mapFrame");
-                                        mapFrame.contentWindow.postMessage({
-                                            type: "highlight_train",
-                                            train: ride.train
-                                        }, "*");
-                                        return `Train:${ride.train} From:${ride.from} To:${ride.to} on:${ride.on} off:${ride.off} duration:${ride.duration}min`;
+                            pan: {
+                                enabled: true,       // 启用平移
+                                mode: 'xy',          // 可向任意方向平移
+                                threshold: 10,
+                                modifierKey: null  // 不需要按辅助键
+                            },
+                            limits: {
+                                x: {
+                                    min: 0,        // 最小经度限制
+                                    max: 24,        // 最大经度限制
+                                    minRange: 3       // 最小缩放范围（最小能放大到5度范围）
+                                },
+                                y: {
+                                    min: 0,
+                                    max: 24,
+                                    minRange: 3       // 最小缩放范围（最小能放大到3度范围）
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function drawSecondScatter() {
+            const chartsData = await (await fetch("data/charts.json")).json();
+            const rides = chartsData.rides;
+
+            // 按首字母 / 数字分组
+            const groups = {};
+
+            rides.forEach(r => {
+                const group = getTrainGroup(r.train);
+
+                if (!groups[group]) groups[group] = [];
+
+                groups[group].push({
+                    x: r.distance,
+                    y: r.duration,
+                    r: 4,
+
+                    _ride: r
+                });
+            });
+
+            // datasets 建立
+            const datasets = Object.keys(groups).map(group => ({
+                label: group,
+                data: groups[group],
+                backgroundColor: colorForGroup(group),
+                borderColor: colorForGroup(group),
+                borderWidth: 1
+            }));
+
+            const ctx = document.getElementById("scatterChart").getContext("2d");
+
+            if (window.scatterChart instanceof Chart) window.scatterChart.destroy();
+
+            window.scatterChart = new Chart(ctx, {
+                type: "bubble",
+                data: {
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: "linear",
+                            min: 0,
+                            max: 2400,
+                            title: { display: true, text: "distance(km)" }
+                        },
+                        y: {
+                            type: "linear",
+                            min: 0,
+                            max: 1400,
+                            title: { display: true, text: "duration(min)" }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: "right",
+                            labels: {
+                                usePointStyle: true  // 圆点样式更好看
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => {
+                                    const ride = ctx.raw._ride;
+                                    const mapFrame = document.getElementById("mapFrame");
+                                    mapFrame.contentWindow.postMessage({
+                                        type: "highlight_train",
+                                        train: ride.train
+                                    }, "*");
+                                    return `Train:${ride.train} From:${ride.from} To:${ride.to} distance:${ride.distance}km duration:${ride.duration}min`;
+                                }
+                            }
+                        },
+                        zoom: {
+                            zoom: {
+                                wheel: {
+                                    enabled: true,  // 启用鼠标滚轮缩放
+                                    speed: 0.2      // 缩放速度
+                                },
+                                pinch: {
+                                    enabled: true    // 触摸板手势缩放
+                                },
+                                mode: 'xy',          // 同时在x和y方向缩放
+                            },
+                            pan: {
+                                enabled: true,       // 启用平移
+                                mode: 'xy',          // 可向任意方向平移
+                                threshold: 10,
+                                modifierKey: null  // 不需要按辅助键
+                            },
+                            limits: {
+                                x: {
+                                    min: 0,        
+                                    max: 2400,        
+                                    minRange: 100       
+                                },
+                                y: {
+                                    min: 0,
+                                    max: 1400,
+                                    minRange:70        
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        async function drawThirdScatter() {
+            const statsData = await (await fetch("data/stats.json")).json();
+            const northStation = statsData.northernmost;
+            const southStation = statsData.southernmost;
+            const eastStation = statsData.easternmost;
+            const westStation = statsData.westernmost;
+            const chartsData = await (await fetch("data/charts.json")).json();
+            const stationcount = chartsData.stationcount;
+            // 按首字母 / 数字分组
+            const groups = {};
+
+            Object.entries(stationcount).forEach(([stationName, s]) => {
+                const group = s.bureau;
+
+                if (!groups[group]) groups[group] = [];
+
+                groups[group].push({
+                    x: s.lng,
+                    y: s.lat,
+                    r: Math.max(4, s.total*1.5),
+                    name: stationName,
+                    _station: s
+                });
+            });
+
+            // datasets 建立
+            const datasets = Object.keys(groups).map(group => ({
+                label: group,
+                data: groups[group],
+                backgroundColor: colorForGroup(group),
+                borderColor: colorForGroup(group),
+                borderWidth: 1
+            }));
+
+
+            const ctx = document.getElementById("scatterChart").getContext("2d");
+
+            if (window.scatterChart instanceof Chart) window.scatterChart.destroy();
+
+            window.scatterChart = new Chart(ctx, {
+                type: "bubble",
+                data: {
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+
+
+                    plugins: {
+                        legend: {
+                            position: "right",
+                            labels: {
+                                usePointStyle: true  // 圆点样式更好看
+                            }
+                        },
+                        
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => {
+                                    const station = ctx.raw._station;
+                                    const mapFrame = document.getElementById("mapFrame");
+                                    mapFrame.contentWindow.postMessage({
+                                        type: "highlight_station",
+                                        station: ctx.raw.name
+                                    }, "*");
+                                    return `Station:${ctx.raw.name} (${station.lng.toFixed(2)},${station.lat.toFixed(2) }) on:${station.on} off:${station.off} total:${station.total}`;
+                                }
+                            }
+                        },
+                        zoom: {
+                            zoom: {
+                                wheel: {
+                                    enabled: true,  // 启用鼠标滚轮缩放
+                                    speed: 0.2      // 缩放速度
+                                },
+                                pinch: {
+                                    enabled: true    // 触摸板手势缩放
+                                },
+                                mode: 'xy',          // 同时在x和y方向缩放
+                            },
+                            pan: {
+                                enabled: true,       // 启用平移
+                                mode: 'xy',          // 可向任意方向平移
+                                threshold: 10,
+                                modifierKey: null  // 不需要按辅助键
+                            },
+                            limits: {
+                                x: {
+                                    min: 100,        // 最小经度限制
+                                    max: 125,        // 最大经度限制
+                                    minRange: 3       // 最小缩放范围（最小能放大到5度范围）
+                                },
+                                y: {
+                                    min: 20,
+                                    max: 45,
+                                    minRange: 1.5       // 最小缩放范围（最小能放大到3度范围）
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: "linear",
+                            min: 100,
+                            max: 125,
+                            title: { display: true, text: "Longitude" }
+                        },
+                        y: {
+                            type: "linear",
+                            min: 20,
+                            max: 45,
+                            title: { display: true, text: "Latitude" }
+                        }
+                    }
+                }
+            });
+        }
+
+
+        async function drawArriveChart() {
+            const chartsData = await (await fetch("data/charts.json")).json();
+
+            const hours = chartsData.arrive_hours;  // 整数小时分布用
+
+            // -------------------------
+            // 1. 转换外部给定最早/最晚时间（含分钟）
+            // -------------------------
+            function convertHMToFloat(hm) {
+                const [h, m] = hm.split(":").map(Number);
+                return h + m / 60 - 0.5;
+            }
+
+            const earliestFloat = convertHMToFloat(chartsData.earliestarr.time);
+            const latestFloat = convertHMToFloat(chartsData.latestarr.time);
+
+            // -------------------------
+            // 2. 整点小时分布 bins (0~23)
+            // --------------------------
+            const bins = new Array(24).fill(0);
+            hours.forEach(h => {
+                if (h >= 0 && h < 24) bins[h]++;
+            });
+
+            // -------------------------
+            // 3. 绘图
+            // -------------------------
+            const ctx = document.getElementById("arriveChart").getContext("2d");
+
+            if (window.arriveChart instanceof Chart) {
+                window.arriveChart.destroy();
+            }
+
+            window.arriveChart = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: [...Array(24).keys()],  // 0~23
+                    datasets: [{
+                        label: "Arrival Count",
+                        data: bins
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            title: { display: true, text: "Arrival Time" },
+                            min: 0,
+                            max: 23
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: "Count" }
+                        }
+                    },
+                    plugins: {
+                        annotation: {
+                            annotations: {
+                                earliestLine: {
+                                    type: "line",
+                                    borderColor: "blue",
+                                    borderWidth: 2,
+                                    value: earliestFloat,
+                                    scaleID: "x",
+                                    label: {
+                                        content: [
+                                            `Earliest：${chartsData.earliestarr.time}`,
+                                            `Train：${chartsData.earliestarr.train}`,
+                                            `From：${chartsData.earliestarr.from}`,
+                                            `To：${chartsData.earliestarr.to}`
+                                        ],
+                                        enabled: true,
+                                        position: "start"
+                                    }
+                                },
+                                latestLine: {
+                                    type: "line",
+                                    borderColor: "red",
+                                    borderWidth: 2,
+                                    value: latestFloat,
+                                    scaleID: "x",
+                                    label: {
+                                        content: [
+                                            `Latest：${chartsData.latestarr.time}`,
+                                            `Train：${chartsData.latestarr.train}`,
+                                            `From：${chartsData.latestarr.from}`,
+                                            `To：${chartsData.latestarr.to}`
+                                        ],
+                                        enabled: true,
+                                        position: "start"
                                     }
                                 }
                             }
                         }
                     }
-                });
+                }
+            });
+        }
+
+        function drawHistogram(durations, distances) {
+            // 1. 初始化 bins（0~600 每 30 一箱，总共 21 个箱）
+            const binSize1 = 30;
+            const maxBin1 = 600;
+            const bins1 = new Array(maxBin1 / binSize1 + 1).fill(0); // 600/30=20→21个bin
+
+            // 2. 填充数据
+            durations.forEach(d => {
+                if (d >= maxBin1) {
+                    bins1[bins1.length - 1]++;    // 溢出箱
+                } else {
+                    const index = Math.floor(d / binSize1);
+                    bins1[index]++;
+                }
+            });
+
+            // 3. 构建 x 轴区间标签，例如 "0-30" "30-60" ... "570–600" "600+"
+            const labels1 = [];
+            for (let i = 0; i < bins1.length - 1; i++) {
+                labels1.push(`${i * binSize1}-${(i + 1) * binSize1}`);
             }
+            labels1.push("600+");
 
-            async function drawAnotherScatter() {
-                const chartsData = await (await fetch("data/charts.json")).json();
-                const rides = chartsData.rides;
+            // distance
+            // 1. 初始化 bins（0~2000 每 100 一箱，总共 21 个箱）
+            const binSize2 = 100;
+            const maxBin2 = 2000;
+            const bins2 = new Array(maxBin2 / binSize2 + 1).fill(0); // 2000/100=20→21个bin
 
-                // 按首字母 / 数字分组
-                const groups = {};
+            // 2. 填充数据
+            distances.forEach(d => {
+                if (d >= maxBin2) {
+                    bins2[bins2.length - 1]++;    // 溢出箱
+                } else {
+                    const index = Math.floor(d / binSize2);
+                    bins2[index]++;
+                }
+            });
 
-                rides.forEach(r => {
-                    const group = getTrainGroup(r.train);
+            // 3. 构建 x 轴区间标签
+            const labels2 = [];
+            for (let i = 0; i < bins2.length - 1; i++) {
+                labels2.push(`${i * binSize2}-${(i + 1) * binSize2}`);
+            }
+            labels2.push("2000+");
 
-                    if (!groups[group]) groups[group] = [];
 
-                    groups[group].push({
-                        x: r.distance,
-                        y: r.duration,
-                        r: 4,
 
-                        _ride: r
-                    });
-                });
+            // 4. 绘图
+            const ctx = document.getElementById("histogramChart").getContext("2d");
 
-                // datasets 建立
-                const datasets = Object.keys(groups).map(group => ({
-                    label: group,
-                    data: groups[group],
-                    backgroundColor: colorForGroup(group),
-                    borderColor: colorForGroup(group),
-                    borderWidth: 1
-                }));
+            if (window.histChart) window.histChart.destroy();
 
-                const ctx = document.getElementById("scatterChart").getContext("2d");
+            // bins1/labels1: 第一个直方图
+            // bins2/labels2: 第二个直方图
 
-                if (window.scatterChart instanceof Chart) window.scatterChart.destroy();
-
-                window.scatterChart = new Chart(ctx, {
-                    type: "bubble",
-                    data: {
-                        datasets: datasets
+            window.histChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    datasets: [
+                        {
+                            label: "Travel Duration",
+                            data: labels1.map((lab, i) => ({ x: lab, y: bins1[i] })),
+                            xAxisID: 'x1',
+                            yAxisID: 'y1',
+                            borderWidth: 1
+                        },
+                        {
+                            label: "Travel Distance",
+                            data: labels2.map((lab, i) => ({ x: lab, y: bins2[i] })),
+                            xAxisID: 'x2',
+                            yAxisID: 'y2',
+                            borderWidth: 1,
+                            hidden: true   // 默认先隐藏第二个
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    parsing: false, // 因为我们用 {x,y} 形式
+                    scales: {
+                        x1: {
+                            type: 'category',
+                            labels: labels1,
+                            display: true,
+                            title: { display: true, text: "Time (min)" }
+                        },
+                        y1: {
+                            beginAtZero: true,
+                            display: true,
+                            title: { display: true, text: "Count (Chart 1)" }
+                        },
+                        x2: {
+                            type: 'category',
+                            labels: labels2,
+                            display: false, // 默认隐藏（因为 dataset2 默认 hidden）
+                            title: { display: true, text: "Distance (km)" }
+                        },
+                        y2: {
+                            beginAtZero: true,
+                            display: false,
+                            position: 'right',
+                            title: { display: true, text: "Count (Chart 2)" }
+                        }
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            x: {
-                                type: "linear",
-                                min: 0,
-                                max: 2400,
-                                title: { display: true, text: "distance(km)" }
-                            },
-                            y: {
-                                type: "linear",
-                                min: 0,
-                                max: 1400,
-                                title: { display: true, text: "duration(min)" }
+                    plugins: {
+                        legend: {
+                            onClick: (e, legendItem, legend) => {
+                                const chart = legend.chart;
+                                const clicked = legendItem.datasetIndex;
+
+                                // 只保留被点击的那个 dataset 显示
+                                chart.data.datasets.forEach((ds, i) => {
+                                    ds.hidden = (i !== clicked) ? true : !ds.hidden; // 再点一次可隐藏它自己
+                                });
+
+                                // 根据当前显示的 dataset 来切换轴显示
+                                const show1 = !chart.data.datasets[0].hidden;
+                                const show2 = !chart.data.datasets[1].hidden;
+
+                                chart.options.scales.x1.display = show1;
+                                chart.options.scales.y1.display = show1;
+                                chart.options.scales.x2.display = show2;
+                                chart.options.scales.y2.display = show2;
+
+                                chart.update();
                             }
                         },
-                        plugins: {
-                            legend: {
-                                position: "right",
-                                labels: {
-                                    usePointStyle: true  // 圆点样式更好看
-                                }
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: ctx => {
-                                        const ride = ctx.raw._ride;
-                                        const mapFrame = document.getElementById("mapFrame");
-                                        mapFrame.contentWindow.postMessage({
-                                            type: "highlight_train",
-                                            train: ride.train
-                                        }, "*");
-                                        return `Train:${ride.train} From:${ride.from} To:${ride.to} distance:${ride.distance}km duration:${ride.duration}min`;
+                        tooltip: {
+                            enabled: true,
+                            mode: 'nearest',
+                            intersect: true,
+
+                            callbacks: {
+                                // 1) 标题：默认一般就是 x 轴对应的 label
+                                title: (items) => {
+                                    if (!items.length) return '';
+                                    const item = items[0];
+                                    label = item.label;
+                                    //const start, end;
+                                    if (label.endsWith('+')) {
+                                        start = Number(label.slice(0, -1));
+                                        end = 999999;
                                     }
-                                }
+                                    else[start, end] = label.split('-').map(Number);
+
+
+
+                                    const dsLabel = item.dataset?.label ?? '';
+
+
+                                    const mapFrame = document.getElementById("mapFrame");
+                                    mapFrame.contentWindow.postMessage({
+                                        type: dsLabel,
+                                        start: start,
+                                        end: end
+                                    }, "*");
+
+
+                                    return item.label ?? (item.raw && item.raw.x != null ? String(item.raw.x) : '');
+                                },
+
+                                // 2) 每一行：默认是 "Dataset Label: Value"
+                                label: (item) => {
+                                    const dsLabel = item.dataset?.label ?? '';
+
+                                    // Chart.js 已经帮你格式化了数字 -> formattedValue
+                                    const value = item.formattedValue ?? '';
+
+                                    // 默认如果 dsLabel 为空就只显示 value
+                                    return dsLabel ? `${dsLabel}: ${value}` : `${value}`;
+                                },
+
+                                // 3) 颜色小方块/marker对应的文字（一般不需要改，保持默认即可）
+                                labelColor: (item) => {
+                                    const style = item.chart.getDatasetMeta(item.datasetIndex).controller.getStyle(item.dataIndex);
+                                    return {
+                                        borderColor: style.borderColor,
+                                        backgroundColor: style.backgroundColor,
+                                        borderWidth: style.borderWidth,
+                                        borderDash: style.borderDash,
+                                        borderDashOffset: style.borderDashOffset,
+                                        borderRadius: 0,
+                                    };
+                                },
+
+                                // 4) 其他默认回调：不写就是空（相当于默认）
+                                // afterLabel: () => '',
+                                // footer: () => ''
                             }
                         }
                     }
-                });
+                }
+            });
+        }
+        function switchScatter() {
+            const chart = window.scatterChart;
+            const axistext = chart.options.scales?.x?.title?.text;
+            if (axistext === "departure time") {
+                drawSecondScatter();
             }
-
-
-
-
-            async function drawArriveChart() {
-                const chartsData = await (await fetch("data/charts.json")).json();
-
-                const hours = chartsData.arrive_hours;  // 整数小时分布用
-
-                // -------------------------
-                // 1. 转换外部给定最早/最晚时间（含分钟）
-                // -------------------------
-                function convertHMToFloat(hm) {
-                    const [h, m] = hm.split(":").map(Number);
-                    return h + m / 60 - 0.5;
-                }
-
-                const earliestFloat = convertHMToFloat(chartsData.earliestarr.time);
-                const latestFloat = convertHMToFloat(chartsData.latestarr.time);
-
-                // -------------------------
-                // 2. 整点小时分布 bins (0~23)
-                // --------------------------
-                const bins = new Array(24).fill(0);
-                hours.forEach(h => {
-                    if (h >= 0 && h < 24) bins[h]++;
-                });
-
-                // -------------------------
-                // 3. 绘图
-                // -------------------------
-                const ctx = document.getElementById("arriveChart").getContext("2d");
-
-                if (window.arriveChart instanceof Chart) {
-                    window.arriveChart.destroy();
-                }
-
-                window.arriveChart = new Chart(ctx, {
-                    type: "bar",
-                    data: {
-                        labels: [...Array(24).keys()],  // 0~23
-                        datasets: [{
-                            label: "Arrival Count",
-                            data: bins
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            x: {
-                                title: { display: true, text: "Arrival Time" },
-                                min: 0,
-                                max: 23
-                            },
-                            y: {
-                                beginAtZero: true,
-                                title: { display: true, text: "Count" }
-                            }
-                        },
-                        plugins: {
-                            annotation: {
-                                annotations: {
-                                    earliestLine: {
-                                        type: "line",
-                                        borderColor: "blue",
-                                        borderWidth: 2,
-                                        value: earliestFloat,
-                                        scaleID: "x",
-                                        label: {
-                                            content: [
-                                                `Earliest：${chartsData.earliestarr.time}`,
-                                                `Train：${chartsData.earliestarr.train}`,
-                                                `From：${chartsData.earliestarr.from}`,
-                                                `To：${chartsData.earliestarr.to}`
-                                            ],
-                                            enabled: true,
-                                            position: "start"
-                                        }
-                                    },
-                                    latestLine: {
-                                        type: "line",
-                                        borderColor: "red",
-                                        borderWidth: 2,
-                                        value: latestFloat,
-                                        scaleID: "x",
-                                        label: {
-                                            content: [
-                                                `Latest：${chartsData.latestarr.time}`,
-                                                `Train：${chartsData.latestarr.train}`,
-                                                `From：${chartsData.latestarr.from}`,
-                                                `To：${chartsData.latestarr.to}`
-                                            ],
-                                            enabled: true,
-                                            position: "start"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-
-            function drawHistogram(durations, distances) {
-                // 1. 初始化 bins（0~600 每 30 一箱，总共 21 个箱）
-                const binSize1 = 30;
-                const maxBin1 = 600;
-                const bins1 = new Array(maxBin1 / binSize1 + 1).fill(0); // 600/30=20→21个bin
-
-                // 2. 填充数据
-                durations.forEach(d => {
-                    if (d >= maxBin1) {
-                        bins1[bins1.length - 1]++;    // 溢出箱
-                    } else {
-                        const index = Math.floor(d / binSize1);
-                        bins1[index]++;
-                    }
-                });
-
-                // 3. 构建 x 轴区间标签，例如 "0-30" "30-60" ... "570–600" "600+"
-                const labels1 = [];
-                for (let i = 0; i < bins1.length - 1; i++) {
-                    labels1.push(`${i * binSize1}-${(i + 1) * binSize1}`);
-                }
-                labels1.push("600+");
-
-                // distance
-                // 1. 初始化 bins（0~2000 每 100 一箱，总共 21 个箱）
-                const binSize2 = 100;
-                const maxBin2 = 2000;
-                const bins2 = new Array(maxBin2 / binSize2 + 1).fill(0); // 2000/100=20→21个bin
-
-                // 2. 填充数据
-                distances.forEach(d => {
-                    if (d >= maxBin2) {
-                        bins2[bins2.length - 1]++;    // 溢出箱
-                    } else {
-                        const index = Math.floor(d / binSize2);
-                        bins2[index]++;
-                    }
-                });
-
-                // 3. 构建 x 轴区间标签
-                const labels2 = [];
-                for (let i = 0; i < bins2.length - 1; i++) {
-                    labels2.push(`${i * binSize2}-${(i + 1) * binSize2}`);
-                }
-                labels2.push("2000+");
-
-
-
-                // 4. 绘图
-                const ctx = document.getElementById("histogramChart").getContext("2d");
-
-                if (window.histChart) window.histChart.destroy();
-
-                // bins1/labels1: 第一个直方图
-                // bins2/labels2: 第二个直方图
-
-                window.histChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        datasets: [
-                            {
-                                label: "Travel Duration",
-                                data: labels1.map((lab, i) => ({ x: lab, y: bins1[i] })),
-                                xAxisID: 'x1',
-                                yAxisID: 'y1',
-                                borderWidth: 1
-                            },
-                            {
-                                label: "Travel Distance",
-                                data: labels2.map((lab, i) => ({ x: lab, y: bins2[i] })),
-                                xAxisID: 'x2',
-                                yAxisID: 'y2',
-                                borderWidth: 1,
-                                hidden: true   // 默认先隐藏第二个
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        parsing: false, // 因为我们用 {x,y} 形式
-                        scales: {
-                            x1: {
-                                type: 'category',
-                                labels: labels1,
-                                display: true,
-                                title: { display: true, text: "Time (min)" }
-                            },
-                            y1: {
-                                beginAtZero: true,
-                                display: true,
-                                title: { display: true, text: "Count (Chart 1)" }
-                            },
-                            x2: {
-                                type: 'category',
-                                labels: labels2,
-                                display: false, // 默认隐藏（因为 dataset2 默认 hidden）
-                                title: { display: true, text: "Distance (km)" }
-                            },
-                            y2: {
-                                beginAtZero: true,
-                                display: false,
-                                position: 'right',
-                                title: { display: true, text: "Count (Chart 2)" }
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                onClick: (e, legendItem, legend) => {
-                                    const chart = legend.chart;
-                                    const clicked = legendItem.datasetIndex;
-
-                                    // 只保留被点击的那个 dataset 显示
-                                    chart.data.datasets.forEach((ds, i) => {
-                                        ds.hidden = (i !== clicked) ? true : !ds.hidden; // 再点一次可隐藏它自己
-                                    });
-
-                                    // 根据当前显示的 dataset 来切换轴显示
-                                    const show1 = !chart.data.datasets[0].hidden;
-                                    const show2 = !chart.data.datasets[1].hidden;
-
-                                    chart.options.scales.x1.display = show1;
-                                    chart.options.scales.y1.display = show1;
-                                    chart.options.scales.x2.display = show2;
-                                    chart.options.scales.y2.display = show2;
-
-                                    chart.update();
-                                }
-                            },
-                            tooltip: {
-                                enabled: true,
-                                mode: 'nearest',
-                                intersect: true,
-
-                                callbacks: {
-                                    // 1) 标题：默认一般就是 x 轴对应的 label
-                                    title: (items) => {
-                                        if (!items.length) return '';
-                                        const item = items[0];
-                                        label = item.label;
-                                        //const start, end;
-                                        if (label.endsWith('+')) {
-                                            start = Number(label.slice(0, -1));
-                                            end = 999999;
-                                        }
-                                        else[start, end] = label.split('-').map(Number);
-
-
-
-                                        const dsLabel = item.dataset?.label ?? '';
-
-
-                                        const mapFrame = document.getElementById("mapFrame");
-                                        mapFrame.contentWindow.postMessage({
-                                            type: dsLabel,
-                                            start: start,
-                                            end: end
-                                        }, "*");
-
-
-                                        return item.label ?? (item.raw && item.raw.x != null ? String(item.raw.x) : '');
-                                    },
-
-                                    // 2) 每一行：默认是 "Dataset Label: Value"
-                                    label: (item) => {
-                                        const dsLabel = item.dataset?.label ?? '';
-
-                                        // Chart.js 已经帮你格式化了数字 -> formattedValue
-                                        const value = item.formattedValue ?? '';
-
-                                        // 默认如果 dsLabel 为空就只显示 value
-                                        return dsLabel ? `${dsLabel}: ${value}` : `${value}`;
-                                    },
-
-                                    // 3) 颜色小方块/marker对应的文字（一般不需要改，保持默认即可）
-                                    labelColor: (item) => {
-                                        const style = item.chart.getDatasetMeta(item.datasetIndex).controller.getStyle(item.dataIndex);
-                                        return {
-                                            borderColor: style.borderColor,
-                                            backgroundColor: style.backgroundColor,
-                                            borderWidth: style.borderWidth,
-                                            borderDash: style.borderDash,
-                                            borderDashOffset: style.borderDashOffset,
-                                            borderRadius: 0,
-                                        };
-                                    },
-
-                                    // 4) 其他默认回调：不写就是空（相当于默认）
-                                    // afterLabel: () => '',
-                                    // footer: () => ''
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-            function switchScatter() {
-                const chart = window.scatterChart;
-                const axistext = chart.options.scales?.x?.title?.text;
-                if (axistext === "departure time") {
-                    drawAnotherScatter();
+            else {
+                if (axistext === "distance(km)") {
+                    drawThirdScatter();
                 }
                 else {
                     drawScatterChart();
-                };
+                }
+            };
 
 
+        }
+
+
+        function moveCanvasTo(canvasId, targetSlotId) {
+            const canvas = document.getElementById(canvasId);
+            const slot = document.getElementById(targetSlotId);
+            if (!canvas || !slot) return;
+
+            slot.appendChild(canvas);
+
+        }
+
+        function showDockedChart(which) {
+            const dockSlot = document.getElementById("dockSlot");
+            const statsSlot = document.getElementById("statsHistSlot");  // 统一用一个下方槽位
+            const statsHint = document.getElementById("statsHint");
+
+            if (!dockSlot || !statsSlot || !statsHint) return;
+
+            statsHint.innerHTML = "";
+
+            if (which === "scatter") {
+                // scatter -> 右侧；histogram -> 下方（真正交换）
+                moveCanvasTo("scatterChart", "dockSlot");
+                moveCanvasTo("histogramChart", "statsHistSlot");
+
+                statsHint.innerHTML = `<button id="bringHistUpBtn">⬆️ Put Histogram beside the map</button>`;
+                document.getElementById("bringHistUpBtn").onclick = () => showDockedChart("hist");
+                document.getElementById("switchScatter").style.display = "block";
+            } else {
+                // histogram -> 右侧；scatter -> 下方（真正交换）
+                moveCanvasTo("histogramChart", "dockSlot");
+                moveCanvasTo("scatterChart", "statsHistSlot");
+
+                statsHint.innerHTML = `<button id="bringScatterUpBtn">⬆️ Put Scatter beside the map</button>
+                                        <button id="switchScatterBtn">Switch Scatter</button>`;
+                document.getElementById("bringScatterUpBtn").onclick = () => showDockedChart("scatter");
+                document.getElementById("switchScatterBtn").onclick = () => switchScatter();
+                document.getElementById("switchScatter").style.display = "none";
+            };
+
+            requestAnimationFrame(resizeAllCharts);
+        }
+
+        // 绑定右侧两个按钮
+        document.getElementById("showScatterBtn")?.addEventListener("click", () => showDockedChart("scatter"));
+        document.getElementById("showHistBtn")?.addEventListener("click", () => showDockedChart("hist"));
+        document.getElementById("switchScatter")?.addEventListener("click", () => switchScatter());
+
+        const divider = document.getElementById("divider");
+        const leftPane = document.getElementById("leftPane");
+        const toggleBtn = document.getElementById("toggleBtn");
+        const dragMask = document.getElementById("dragMask");
+
+        let isDragging = false;
+
+        // 拖动开始
+        divider.addEventListener("mousedown", (e) => {
+            isDragging = true;
+            dragMask.style.display = "block";   // ⬅️ 启动遮罩层
+        });
+
+        // 拖动中
+        document.addEventListener("mousemove", (e) => {
+            if (!isDragging) return;
+
+            const newWidth = e.clientX;
+            if (newWidth > 0 && newWidth < window.innerWidth) {
+                leftPane.style.width = newWidth - 5 + "px";
             }
-
-
-            function moveCanvasTo(canvasId, targetSlotId) {
-                const canvas = document.getElementById(canvasId);
-                const slot = document.getElementById(targetSlotId);
-                if (!canvas || !slot) return;
-
-                slot.appendChild(canvas);
-
+            if (newWidth > window.innerWidth - 500) {
+                rightPane.style.display = "none";
             }
+            else rightPane.style.display = "flex";
+        });
 
-            function showDockedChart(which) {
-                const dockSlot = document.getElementById("dockSlot");
-                const statsSlot = document.getElementById("statsHistSlot");  // 统一用一个下方槽位
-                const statsHint = document.getElementById("statsHint");
+        // 拖动结束
+        document.addEventListener("mouseup", (e) => {
+            isDragging = false;
+            dragMask.style.display = "none"; // ⬅️ 关闭遮罩层
+            resizeAllCharts();
+        });
 
-                if (!dockSlot || !statsSlot || !statsHint) return;
 
-                statsHint.innerHTML = "";
-
-                if (which === "scatter") {
-                    // scatter -> 右侧；histogram -> 下方（真正交换）
-                    moveCanvasTo("scatterChart", "dockSlot");
-                    moveCanvasTo("histogramChart", "statsHistSlot");
-
-                    statsHint.innerHTML = `<button id="bringHistUpBtn">⬆️ Put Histogram beside the map</button>`;
-                    document.getElementById("bringHistUpBtn").onclick = () => showDockedChart("hist");
-                    document.getElementById("switchScatter").style.display = "block";
-                } else {
-                    // histogram -> 右侧；scatter -> 下方（真正交换）
-                    moveCanvasTo("histogramChart", "dockSlot");
-                    moveCanvasTo("scatterChart", "statsHistSlot");
-
-                    statsHint.innerHTML = `<button id="bringScatterUpBtn">⬆️ Put Scatter beside the map</button>
-                        <button id="switchScatterBtn">Switch Scatter</button>`;
-                    document.getElementById("bringScatterUpBtn").onclick = () => showDockedChart("scatter");
-                    document.getElementById("switchScatterBtn").onclick = () => switchScatter();
-                    document.getElementById("switchScatter").style.display = "none";
-                };
-
-                requestAnimationFrame(resizeAllCharts);
+        // 折叠 / 展开
+        toggleBtn.addEventListener("click", () => {
+            if (leftPane.classList.contains("collapsed")) {
+                leftPane.classList.remove("collapsed");
+                leftPane.style.width = "100%";
+                rightPane.style.display = "none";
+                toggleBtn.textContent = "⮜";
+            } else {
+                leftPane.classList.add("collapsed");
+                leftPane.style.width = 0;
+                rightPane.style.display = "flex";
+                toggleBtn.textContent = "⮞";
             }
+            requestAnimationFrame(resizeAllCharts);
+        });
 
-            // 绑定右侧两个按钮
-            document.getElementById("showScatterBtn")?.addEventListener("click", () => showDockedChart("scatter"));
-            document.getElementById("showHistBtn")?.addEventListener("click", () => showDockedChart("hist"));
-            document.getElementById("switchScatter")?.addEventListener("click", () => switchScatter());
-
-            const divider = document.getElementById("divider");
-            const leftPane = document.getElementById("leftPane");
-            const toggleBtn = document.getElementById("toggleBtn");
-            const dragMask = document.getElementById("dragMask");
-
-            let isDragging = false;
-
-            // 拖动开始
-            divider.addEventListener("mousedown", (e) => {
-                isDragging = true;
-                dragMask.style.display = "block";   // ⬅️ 启动遮罩层
-            });
-
-            // 拖动中
-            document.addEventListener("mousemove", (e) => {
-                if (!isDragging) return;
-
-                const newWidth = e.clientX;
-                if (newWidth > 0 && newWidth < window.innerWidth) {
-                    leftPane.style.width = newWidth - 5 + "px";
-                }
-                if (newWidth > window.innerWidth - 500) {
-                    rightPane.style.display = "none";
-                }
-                else rightPane.style.display = "flex";
-            });
-
-            // 拖动结束
-            document.addEventListener("mouseup", (e) => {
-                isDragging = false;
-                dragMask.style.display = "none"; // ⬅️ 关闭遮罩层
-                resizeAllCharts();
-            });
-
-
-            // 折叠 / 展开
-            toggleBtn.addEventListener("click", () => {
-                if (leftPane.classList.contains("collapsed")) {
-                    leftPane.classList.remove("collapsed");
-                    leftPane.style.width = "100%";
-                    rightPane.style.display = "none";
-                    toggleBtn.textContent = "⮜";
-                } else {
-                    leftPane.classList.add("collapsed");
-                    leftPane.style.width = 0;
-                    rightPane.style.display = "flex";
-                    toggleBtn.textContent = "⮞";
-                }
-                requestAnimationFrame(resizeAllCharts);
-            });
-
-            function resizeAllCharts() {
-                if (window.scatterChart instanceof Chart) {
-                    window.scatterChart.maintainAspectRatio = false;
-                    window.scatterChart.resize();
-                }
-                if (window.histChart instanceof Chart) {
-                    window.histChart.maintainAspectRatio = false;
-                    window.histChart.resize();
-                }
+        function resizeAllCharts() {
+            if (window.scatterChart instanceof Chart) {
+                window.scatterChart.maintainAspectRatio = false;
+                window.scatterChart.resize();
             }
-        </script>
+            if (window.histChart instanceof Chart) {
+                window.histChart.maintainAspectRatio = false;
+                window.histChart.resize();
+            }
+        }
+    </script>
 
-        <!-- Footer-->
-        <footer class="bg-bottom text-center py-5">
-            <div class="container px-5">
-                <div class="text-white-50 small">
-                    <div id="copyright-text" class="mb-2"></div>
-                    <a id="github-link" href="https://github.com/Ethenone">Github</a>
-                    <span class="mx-1">&middot;</span>
-                    <a id="license-link"
-                       href="https://github.com/Ethenone/Ethenone.github.io/blob/master/LICENSE">License</a>
-                </div>
+    <!-- Footer-->
+    <footer class="bg-bottom text-center py-5">
+        <div class="container px-5">
+            <div class="text-white-50 small">
+                <div id="copyright-text" class="mb-2"></div>
+                <a id="github-link" href="https://github.com/Ethenone">Github</a>
+                <span class="mx-1">&middot;</span>
+                <a id="license-link"
+                   href="https://github.com/Ethenone/Ethenone.github.io/blob/master/LICENSE">License</a>
             </div>
-        </footer>
+        </div>
+    </footer>
 
 </body>
 </html>
