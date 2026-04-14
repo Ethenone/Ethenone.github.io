@@ -839,6 +839,467 @@
             return window.cityChart;
         }
 
+        function drawCityCountChart2(data) {
+            const canvas = document.getElementById('CityCount');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+
+            const ctx = canvas.getContext('2d');
+            if (window.CityCount instanceof Chart) {
+                window.CityCount.destroy();
+            }
+            const container = document.getElementById('CityCountSlot');
+
+            let alreadyContainer = document.getElementById('button-container');
+
+            if (alreadyContainer) {
+                alreadyContainer.remove();
+            }
+            // 创建按钮容器
+            const buttonContainer = document.createElement('div');
+            buttonContainer.style.position = 'relative';
+            buttonContainer.style.display = 'flex';
+            buttonContainer.style.justifyContent = 'center';
+            buttonContainer.style.alignItems = 'center';
+            buttonContainer.style.marginTop = '10px';
+            buttonContainer.style.gap = '20px';
+            buttonContainer.id = 'button-container';
+
+            // 创建左移按钮
+            const leftButton = document.createElement('button');
+            leftButton.innerHTML = '← Prev';
+            leftButton.style.padding = '8px 20px';
+            leftButton.style.fontSize = '14px';
+            leftButton.style.cursor = 'pointer';
+            leftButton.style.backgroundColor = '#3b82f6';
+            leftButton.style.color = 'white';
+            leftButton.style.border = 'none';
+            leftButton.style.borderRadius = '5px';
+            leftButton.style.transition = 'background-color 0.3s';
+
+            // 创建右移按钮
+            const rightButton = document.createElement('button');
+            rightButton.innerHTML = 'Next →';
+            rightButton.style.padding = '8px 20px';
+            rightButton.style.fontSize = '14px';
+            rightButton.style.cursor = 'pointer';
+            rightButton.style.backgroundColor = '#3b82f6';
+            rightButton.style.color = 'white';
+            rightButton.style.border = 'none';
+            rightButton.style.borderRadius = '5px';
+            rightButton.style.transition = 'background-color 0.3s';
+
+            // 添加悬停效果
+            leftButton.onmouseover = () => leftButton.style.backgroundColor = '#2563eb';
+            leftButton.onmouseout = () => leftButton.style.backgroundColor = '#3b82f6';
+            rightButton.onmouseover = () => rightButton.style.backgroundColor = '#2563eb';
+            rightButton.onmouseout = () => rightButton.style.backgroundColor = '#3b82f6';
+
+            // 创建位置指示器
+            const positionIndicator = document.createElement('span');
+            positionIndicator.style.fontSize = '14px';
+            positionIndicator.style.color = '#666';
+            positionIndicator.style.margin = '0 10px';
+
+            buttonContainer.appendChild(leftButton);
+            buttonContainer.appendChild(positionIndicator);
+            buttonContainer.appendChild(rightButton);
+
+            // 将按钮容器添加到CityCountSlot后面
+            container.parentNode.insertBefore(buttonContainer, container.nextSibling);
+
+            // 验证数据
+            if (!data || typeof data !== 'object') {
+                console.error('Invalid data: data is null or not an object', data);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.font = '14px Arial';
+                ctx.fillStyle = '#666';
+                ctx.textAlign = 'center';
+                ctx.fillText('no data error', canvas.width / 2, canvas.height / 2);
+                return;
+            }
+
+            // 存储原始数据和处理后的数据
+            let originalData = data;
+            let currentVisibleDatasets = {
+                on: true,
+                off: true
+            };
+
+            // 当前滚动位置（单位：城市索引）
+            let currentScrollIndex = 0;
+            const VISIBLE_CITIES = 15; // 一次显示的城市数量
+
+            // 配置常量
+            const CHART_HEIGHT = 450;
+
+            // 设置canvas尺寸适应容器
+            const resizeCanvas = () => {
+                const containerWidth = container.clientWidth || 800;
+
+                canvas.width = containerWidth;
+                canvas.height = CHART_HEIGHT;
+                container.style.height = CHART_HEIGHT + 'px';
+
+                if (window.cityChart) {
+                    updateChart();
+                }
+            };
+
+            // 数据处理：根据当前可见的数据集重新排序
+            const processData = (rawData) => {
+                try {
+                    const cityDataArray = Object.entries(rawData)
+                        .map(([city, values]) => {
+                            if (!values || typeof values !== 'object') {
+                                console.warn(`Invalid data for city: ${city}`, values);
+                                return null;
+                            }
+
+                            const on = Number(values.on) || 0;
+                            const off = Number(values.off) || 0;
+                            const total = Number(values.total) || (on + off);
+
+                            return {
+                                city: String(city),
+                                on: on,
+                                off: off,
+                                total: total
+                            };
+                        })
+                        .filter(item => item !== null);
+
+                    cityDataArray.forEach(item => {
+                        let visibleTotal = 0;
+                        if (currentVisibleDatasets.on) visibleTotal += item.on;
+                        if (currentVisibleDatasets.off) visibleTotal += item.off;
+                        item.sortValue = visibleTotal;
+                    });
+
+                    return cityDataArray.sort((a, b) => {
+                        if (a.sortValue === 0 && b.sortValue === 0) {
+                            return b.total - a.total;
+                        }
+                        return b.sortValue - a.sortValue;
+                    });
+                } catch (error) {
+                    console.error('Error processing data:', error);
+                    return [];
+                }
+            };
+
+            // 获取当前可见的数据切片
+            const getVisibleData = (fullData) => {
+                const start = currentScrollIndex;
+                const end = Math.min(start + VISIBLE_CITIES, fullData.length);
+                return fullData.slice(start, end);
+            };
+
+            // 计算当前可见数据的最大值
+            const getCurrentMaxValue = (visibleData) => {
+                let maxValue = 0;
+                visibleData.forEach(item => {
+                    let Value = 0;
+                    if (currentVisibleDatasets.on) Value += item.on;
+                    if (currentVisibleDatasets.off) Value += item.off;
+                    maxValue = Math.max(maxValue, Value);
+                });
+                return maxValue;
+            };
+
+            // 更新位置指示器
+            const updatePositionIndicator = (totalCities) => {
+                const endIndex = Math.min(currentScrollIndex + VISIBLE_CITIES, totalCities);
+                positionIndicator.textContent = `Showing ${currentScrollIndex + 1}-${endIndex} / ${totalCities} cities in total`;
+
+                // 更新按钮状态
+                leftButton.disabled = currentScrollIndex === 0;
+                rightButton.disabled = endIndex >= totalCities;
+
+                leftButton.style.opacity = leftButton.disabled ? '0.5' : '1';
+                leftButton.style.cursor = leftButton.disabled ? 'not-allowed' : 'pointer';
+                rightButton.style.opacity = rightButton.disabled ? '0.5' : '1';
+                rightButton.style.cursor = rightButton.disabled ? 'not-allowed' : 'pointer';
+            };
+
+            // 移动视图
+            const moveView = (direction) => {
+                const processedData = processData(originalData);
+                const maxStartIndex = Math.max(0, processedData.length - VISIBLE_CITIES);
+
+                if (direction === 'left') {
+                    currentScrollIndex = Math.max(0, currentScrollIndex - 1);
+                } else {
+                    currentScrollIndex = Math.min(maxStartIndex, currentScrollIndex + 1);
+                }
+
+                // 重新绘制图表
+                redrawWithVisibleData(processedData);
+                updatePositionIndicator(processedData.length);
+            };
+
+            // 使用可见数据重新绘制
+            const redrawWithVisibleData = (fullData) => {
+                const visibleData = getVisibleData(fullData);
+                const cities = visibleData.map(item => item.city);
+                const onData = visibleData.map(item => item.on);
+                const offData = visibleData.map(item => item.off);
+
+                // 计算当前可见数据的最大值
+                const currentMaxValue = getCurrentMaxValue(visibleData);
+                // 设置y轴最大值（向上取整到10的倍数再加10）
+                const yAxisMax = Math.ceil(currentMaxValue / 10) * 10 + 10;
+
+                if (window.cityChart) {
+                    window.cityChart.data.labels = cities;
+                    window.cityChart.data.datasets[0].data = onData;
+                    window.cityChart.data.datasets[1].data = offData;
+
+                    // 动态更新y轴范围
+                    window.cityChart.options.scales.y.max = yAxisMax;
+
+                    window.cityChart.update();
+                }
+            };
+
+            // 按钮点击事件
+            leftButton.onclick = () => moveView('left');
+            rightButton.onclick = () => moveView('right');
+
+            // 更新图表
+            const updateChart = () => {
+                try {
+                    const processedData = processData(originalData);
+
+                    if (processedData.length === 0) {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.font = '14px Arial';
+                        ctx.fillStyle = '#666';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('no cities error', canvas.width / 2, canvas.height / 2);
+                        return;
+                    }
+
+                    // 重置滚动位置
+                    currentScrollIndex = 0;
+
+                    // 获取可见数据
+                    const visibleData = getVisibleData(processedData);
+                    const cities = visibleData.map(item => item.city);
+                    const onData = visibleData.map(item => item.on);
+                    const offData = visibleData.map(item => item.off);
+
+                    // 计算当前可见数据的最大值
+                    const currentMaxValue = getCurrentMaxValue(visibleData);
+                    // 设置y轴最大值（向上取整到10的倍数再加10）
+                    const yAxisMax = Math.ceil(currentMaxValue / 10) * 10 + 10;
+
+                    if (window.cityChart) {
+                        window.cityChart.data.labels = cities;
+                        window.cityChart.data.datasets[0].data = onData;
+                        window.cityChart.data.datasets[1].data = offData;
+                        window.cityChart.data.datasets[0].hidden = !currentVisibleDatasets.on;
+                        window.cityChart.data.datasets[1].hidden = !currentVisibleDatasets.off;
+
+                        // 动态更新y轴范围
+                        window.cityChart.options.scales.y.max = yAxisMax;
+
+                        window.cityChart.update();
+                    } else {
+                        window.cityChart = new Chart(ctx, {
+                            type: 'line',  // 改为折线图
+                            data: {
+                                labels: cities,
+                                datasets: [
+                                    {
+                                        label: 'Departure',
+                                        data: onData,
+                                        borderColor: '#f97316',
+                                        backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                                        borderWidth: 2,
+                                        tension: 0.3,  // 曲线平滑度，0为直线，1为最大平滑
+                                        fill: true,
+                                        pointRadius: 4,
+                                        pointHoverRadius: 6,
+                                        pointBackgroundColor: '#f97316',
+                                        pointBorderColor: '#fff',
+                                        pointBorderWidth: 2,
+                                        order: 1,
+                                        hidden: !currentVisibleDatasets.on,
+                                    },
+                                    {
+                                        label: 'Arrival',
+                                        data: offData,
+                                        borderColor: '#3b82f6',
+                                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                        borderWidth: 2,
+                                        tension: 0.3,
+                                        fill: true,
+                                        pointRadius: 4,
+                                        pointHoverRadius: 6,
+                                        pointBackgroundColor: '#3b82f6',
+                                        pointBorderColor: '#fff',
+                                        pointBorderWidth: 2,
+                                        order: 2,
+                                        hidden: !currentVisibleDatasets.off,
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                layout: {
+                                    padding: {
+                                        left: 10,
+                                        right: 10,
+                                        top: 10,
+                                        bottom: 10
+                                    }
+                                },
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: `Urban Travel Statistics - Departure / Arrival Trends (for a total of ${processedData.length} cities)`,
+                                        font: { size: 16, weight: 'bold' },
+                                        padding: { top: 10, bottom: 20 }
+                                    },
+                                    legend: {
+                                        display: true,
+                                        position: 'top',
+                                        labels: { usePointStyle: true, padding: 15 },
+                                        onClick: (e, legendItem, legend) => {
+                                            const index = legendItem.datasetIndex;
+                                            const chart = legend.chart;
+
+                                            if (index === 0) {
+                                                currentVisibleDatasets.on = !currentVisibleDatasets.on;
+                                            } else if (index === 1) {
+                                                currentVisibleDatasets.off = !currentVisibleDatasets.off;
+                                            }
+
+                                            const newProcessedData = processData(originalData);
+
+                                            // 重置滚动位置
+                                            currentScrollIndex = 0;
+
+                                            // 更新可见数据
+                                            const newVisibleData = getVisibleData(newProcessedData);
+                                            const newCities = newVisibleData.map(item => item.city);
+                                            const newOnData = newVisibleData.map(item => item.on);
+                                            const newOffData = newVisibleData.map(item => item.off);
+
+                                            // 计算新的最大值并更新y轴
+                                            const newMaxValue = getCurrentMaxValue(newVisibleData);
+                                            chart.options.scales.y.max = Math.ceil(newMaxValue / 10) * 10 + 10;
+
+                                            chart.data.labels = newCities;
+                                            chart.data.datasets[0].data = newOnData;
+                                            chart.data.datasets[1].data = newOffData;
+                                            chart.data.datasets[0].hidden = !currentVisibleDatasets.on;
+                                            chart.data.datasets[1].hidden = !currentVisibleDatasets.off;
+
+                                            // 更新标题
+                                            chart.options.plugins.title.text = `Urban Travel Statistics - Departure / Arrival Trends (for a total of ${newProcessedData.length} cities)`;
+
+                                            chart.update();
+
+                                            // 更新位置指示器
+                                            updatePositionIndicator(newProcessedData.length);
+
+                                            return false;
+                                        }
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: (context) => {
+                                                const label = context.dataset.label || '';
+                                                const value = context.raw || 0;
+                                                return `${label}: ${value}`;
+                                            },
+                                            footer: (tooltipItems) => {
+                                                if (tooltipItems.length === 2) {
+                                                    const total = tooltipItems[0].raw + tooltipItems[1].raw;
+                                                    return `Total: ${total}`;
+                                                }
+                                                return '';
+                                            }
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    x: {
+                                        grid: {
+                                            display: true,
+                                            drawBorder: true,
+                                            drawOnChartArea: false
+                                        },
+                                        ticks: {
+                                            font: { size: 12, weight: '500' },
+                                            maxRotation: 45,
+                                            minRotation: 45,
+                                            autoSkip: false,
+                                        }
+                                    },
+                                    y: {
+                                        beginAtZero: true,
+                                        max: yAxisMax,
+                                        title: {
+                                            display: true,
+                                            text: 'Count',
+                                            font: { size: 13, weight: '500' }
+                                        },
+                                        ticks: {
+                                            stepSize: 5,
+                                            font: { size: 12 },
+                                            callback: function (value) {
+                                                return value;
+                                            }
+                                        },
+                                        grid: {
+                                            drawBorder: true,
+                                            color: 'rgba(0, 0, 0, 0.1)'
+                                        }
+                                    }
+                                },
+                                // 折线图特有的交互效果
+                                interaction: {
+                                    mode: 'index',
+                                    intersect: false,
+                                },
+                                // 添加 hover 效果
+                                hover: {
+                                    mode: 'nearest',
+                                    intersect: true
+                                }
+                            }
+                        });
+                    }
+
+                    // 更新位置指示器
+                    updatePositionIndicator(processedData.length);
+
+                } catch (error) {
+                    console.error('Error updating chart:', error);
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.font = '14px Arial';
+                    ctx.fillStyle = '#f00';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('图表更新失败', canvas.width / 2, canvas.height / 2);
+                }
+            };
+
+            // 初始化尺寸和绘图
+            resizeCanvas();
+            updateChart();
+
+            window.addEventListener('resize', () => {
+                resizeCanvas();
+            });
+
+            return window.cityChart;
+        }
         async function loadStats() {
             const statsData = await (await fetch("data/stats.json")).json();
             const chartsData = await (await fetch("data/charts.json")).json();
@@ -927,6 +1388,12 @@
                         }
                     },
                     plugins: {
+                        title: {
+                            display: true,
+                            text: `Departure Time Distribution`,
+                            font: { size: 16, weight: 'bold' },
+                            padding: { top: 10, bottom: 20 }
+                        },
                         annotation: {
                             annotations: {
                                 earliestLine: {
@@ -996,7 +1463,8 @@
                 "中国铁路济南局": "rgba(255,152,0,0.65)",
                 "中国铁路上海局": "rgba(0, 128, 128, 0.65)",
                 "中国铁路昆明局": "rgba(255, 99, 71, 0.65)",
-                "珠三角城际": "rgba(123, 104, 238, 0.65)"
+                "珠三角城际": "rgba(123, 104, 238, 0.65)",
+                "中国铁路乌鲁木齐局": "rgba(128,128,0,0.65)"
             };
 
             if (predefined[group]) return predefined[group];
@@ -1070,6 +1538,12 @@
                         }
                     },
                     plugins: {
+                        title: {
+                            display: true,
+                            text: `On-Off-Duration Scatter`,
+                            font: { size: 16, weight: 'bold' },
+                            padding: { top: 10, bottom: 20 }
+                        },
                         legend: {
                             position: "right",
                             labels: {
@@ -1181,6 +1655,12 @@
                         }
                     },
                     plugins: {
+                        title: {
+                            display: true,
+                            text: `Distance-Duration Scatter`,
+                            font: { size: 16, weight: 'bold' },
+                            padding: { top: 10, bottom: 20 }
+                        },
                         legend: {
                             position: "right",
                             labels: {
@@ -1284,6 +1764,12 @@
 
 
                     plugins: {
+                        title: {
+                            display: true,
+                            text: `Stations' Location-Frequency Scatter`,
+                            font: { size: 16, weight: 'bold' },
+                            padding: { top: 10, bottom: 20 }
+                        },
                         legend: {
                             position: "right",
                             labels: {
@@ -1410,6 +1896,12 @@
                         }
                     },
                     plugins: {
+                        title: {
+                            display: true,
+                            text: `Arrival Time Distribution`,
+                            font: { size: 16, weight: 'bold' },
+                            padding: { top: 10, bottom: 20 }
+                        },
                         annotation: {
                             annotations: {
                                 earliestLine: {
@@ -1560,6 +2052,12 @@
                         }
                     },
                     plugins: {
+                        title: {
+                            display: true,
+                            text: `Distance and Duration Histogram`,
+                            font: { size: 16, weight: 'bold' },
+                            padding: { top: 10, bottom: 20 }
+                        },
                         legend: {
                             onClick: (e, legendItem, legend) => {
                                 const chart = legend.chart;

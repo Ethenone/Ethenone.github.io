@@ -42,4 +42,6 @@ Awarded in the Graduation Project Exhibition Competition (9/90)
 
 - Established a complete workflow combining computational screening, lab validation, and data analysis for cfDNA-based cancer detection.
 
-- Patent applied and manuscript currently under review
+- Patent applied and manuscript currently under revision
+
+
