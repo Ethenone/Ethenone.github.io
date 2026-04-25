@@ -13,12 +13,17 @@ print("reading station data")
 statdata = pd.read_csv(f'{database}//stations_data.csv',encoding='gbk')
 #statdata.head()
 statgeo = {}
-for i in range(len(statdata)):
-    lat = statdata['纬度'][i]
-    lng = statdata['经度'][i]
+stat_affiliation = {}
+for i,row in statdata.iterrows():
+    lat = row['纬度']
+    lng = row['经度']
     loc = [lat,lng]
 #     loc = correct(loc)
-    statgeo[statdata['车站'][i]]=loc
+    statgeo[row['车站']]=loc
+    stat_affiliation[row['车站']]={'lat':lat,'lng':lng,
+                                 'bureau':row['路局'],
+                                 'city':row['市'],
+                                 'province':row['省']}
 #print(statgeo)    
 
 print("reading train travel record")
@@ -67,6 +72,10 @@ for i in range(len(data)):
     distance = int(b['里程'])
     From = b['上车站']
     To = b['下车站']
+    Fromcity = stat_affiliation[From]['city']
+    Tocity = stat_affiliation[To]['city']
+    Fromprov = stat_affiliation[From]['province']
+    Toprov = stat_affiliation[To]['province']
     polyline = []
     
     for p in a[5:]:
@@ -79,16 +88,16 @@ for i in range(len(data)):
         polyline.append(loc)
         heatmap_data.append(loc)
     
-    polyline_set.append([polyline,color,train,duration,distance,From,To])
-    point_set.append([loc,color,name,train,duration,distance,From,To])
-    point_set.append([statgeo[a.iloc[5]],color,a.iloc[5],train,duration,distance,From,To])
+    polyline_set.append([polyline,color,train,duration,distance,From,To,Fromcity,Tocity,Fromprov,Toprov])
+    point_set.append([loc,color,name,train,duration,distance,From,To,Fromcity,Tocity,Fromprov,Toprov])
+    point_set.append([statgeo[a.iloc[5]],color,a.iloc[5],train,duration,distance,From,To,Fromcity,Tocity,Fromprov,Toprov])
 
     
 #after = folium.FeatureGroup(name='since 2024')
 #before = folium.FeatureGroup(name='before 2024')
 group = folium.FeatureGroup(name = 'all')
 group1 = folium.FeatureGroup(name = 'discard')
-for polyline,color,train,duration,distance,From,To in polyline_set:
+for polyline,color,train,duration,distance,From,To,Fromcity,Tocity,Fromprov,Toprov in polyline_set:
     op = 0.3
     #group  = after
     if color == 'blue':
@@ -96,11 +105,15 @@ for polyline,color,train,duration,distance,From,To in polyline_set:
         #group = before
     geojson = {
         "type":"Feature",
-        "properties":{"id":train,
+        "properties":{"id":str(train),
                       "duration":duration,
                       "distance":distance,
                       "from":From,
-                      "to":To},
+                      "to":To,
+                      "fromcity":Fromcity,
+                      "tocity":Tocity,
+                      "fromprov":Fromprov,
+                      "toprov":Toprov},
         "geometry":{
             "type":"LineString",
             "coordinates":[[lng,lat] for lat, lng in polyline]}
@@ -114,17 +127,21 @@ for polyline,color,train,duration,distance,From,To in polyline_set:
         opacity=op
     ).add_to(group)
 
-for point,color,name,train,duration,distance,From,To in point_set:
+for point,color,name,train,duration,distance,From,To,Fromcity,Tocity,Fromprov,Toprov in point_set:
     #group = after
     #if color == 'blue':
         #group = before
     geojson = {
         "type":"Feature",
-        "properties":{"id":train,
+        "properties":{"id":str(train),
                       "duration":duration,
                       "distance":distance,
                       "from":From,
-                      "to":To},
+                      "to":To,
+                      "fromcity":Fromcity,
+                      "tocity":Tocity,
+                      "fromprov":Fromprov,
+                      "toprov":Toprov},
         "geometry":{
             "type":"Point",
             "coordinates":[point[1],point[0]]}
@@ -155,16 +172,89 @@ custom_html = f"""
         if (msg.type === "highlight_train") {{
             highlightRoute(msg.train);
         }}
-        if (msg.type === "Travel Duration") {{
+        else if (msg.type === "Travel Duration") {{
             highlightDuration(msg.start, msg.end);
         }}
-        if (msg.type === "Travel Distance") {{
+        else if (msg.type === "Travel Distance") {{
             highlightDistance(msg.start, msg.end);
         }}
-        if (msg.type === "highlight_station") {{
+        else if (msg.type === "highlight_station") {{
             highlightStation(msg.station);
         }}
+        else if (msg.type === "highlight_city"){{
+            highlightCity(msg.city);
+        }}
+        else if (msg.type === "highlight_prov"){{
+            highlightProv(msg.prov);
+        }}
+        else if (msg.type === "highlight_train_type"){{
+            highlightTrainType(msg.train_type);
+        }}
     }});
+    function highlightTrainType(train_type) {{
+        {map_var}.eachLayer(function (layer) {{
+            if (layer.feature) {{
+                let train = layer.feature.properties.id;
+                let flag = false;
+                if (/^[A-Za-z]/.test(train)) flag = ( train[0] === train_type);
+                else flag = (train_type === "数字车次");
+                if (flag) {{
+                    layer.setStyle({{
+                        color: "red",
+                        weight: 6,
+                        opacity: 0.7
+                    }});
+                }}
+                else {{
+                    layer.setStyle({{
+                        color: "blue",
+                        weight: 3,
+                        opacity: 0.2
+                    }});
+                }};
+            }}
+        }});
+    }}
+    function highlightProv(prov) {{
+        {map_var}.eachLayer(function (layer) {{
+            if (layer.feature) {{
+                if (layer.feature.properties.fromprov === prov || layer.feature.properties.toprov === prov) {{
+                    layer.setStyle({{
+                        color: "red",
+                        weight: 6,
+                        opacity: 0.7
+                    }});
+                }}
+                else {{
+                    layer.setStyle({{
+                        color: "blue",
+                        weight: 3,
+                        opacity: 0.2
+                    }});
+                }};
+            }}
+        }});
+    }}
+    function highlightCity(city) {{
+        {map_var}.eachLayer(function (layer) {{
+            if (layer.feature) {{
+                if (layer.feature.properties.fromcity === city || layer.feature.properties.tocity === city) {{
+                    layer.setStyle({{
+                        color: "red",
+                        weight: 6,
+                        opacity: 0.7
+                    }});
+                }}
+                else {{
+                    layer.setStyle({{
+                        color: "blue",
+                        weight: 3,
+                        opacity: 0.2
+                    }});
+                }};
+            }}
+        }});
+    }}
     function highlightStation(station) {{
         {map_var}.eachLayer(function (layer) {{
             if (layer.feature) {{

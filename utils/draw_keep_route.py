@@ -158,16 +158,19 @@ folium.TileLayer(tiles='http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r
                  control=True,
                  show=True,
                  overlay=False,
-                 name='straight-line map'
+                 name='Heatmap'
                 ).add_to(m)
 
-group_conn = folium.FeatureGroup(name = 'straight-line')
+group_conn = folium.FeatureGroup(name = 'connecting line',show=False)
 group_start = folium.FeatureGroup(name = 'origin',show=False)
-group_start_heatmap = folium.FeatureGroup(name = 'origin heatmap',show=False)
+group_start_heatmap = folium.FeatureGroup(name = 'origin heatmap')
 group_end = folium.FeatureGroup(name = 'destination',show=False)
-group_end_heatmap = folium.FeatureGroup(name = 'destination heatmap',show=False)
+group_end_heatmap = folium.FeatureGroup(name = 'destination heatmap')
+group_route_heatmap = folium.FeatureGroup(name = 'route heatmap',show = False)
+
 start = []
 end = []
+point_list = []
 for i in data:
     if not i['summary_polyline']:
         continue
@@ -195,12 +198,17 @@ for i in data:
     ).add_to(group_end)
     start.append(pl[0])
     end.append(pl[-1])
+    point_list.extend(pl)
+
+
 plugins.HeatMap(start,radius=15).add_to(group_start_heatmap)
 plugins.HeatMap(end,radius=15).add_to(group_end_heatmap)
+plugins.HeatMap(point_list,radius=10).add_to(group_route_heatmap)
 group_end.add_to(m)
 group_start.add_to(m)
 group_end_heatmap.add_to(m)
 group_start_heatmap.add_to(m)
+group_route_heatmap.add_to(m)
 group_conn.add_to(m)
 folium.LayerControl(collapsed=False).add_to(m)
 m.save(f'{output}//straight-line.html')

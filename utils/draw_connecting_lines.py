@@ -170,7 +170,7 @@ group_train.add_to(m)
 
 print("reading car travel record")
 datac = pd.read_excel(f'{database}//³µÐÐ¹ì¼£.xlsx', sheet_name = 0)
-group_car = folium.FeatureGroup(name='car')
+group_car = folium.FeatureGroup(name='car',show = False)
 for i in range(len(datac)):
 
     start = [datac['depart_lat'][i],datac['depart_lon'][i]]
