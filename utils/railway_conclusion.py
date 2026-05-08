@@ -18,6 +18,11 @@ data_air = pd.read_excel(f'{database}//飞机乘坐记录.xlsx', sheet_name = 0)
 data_f = pd.read_excel(f'{database}/境外铁路乘坐记录.xlsx', sheet_name = '乘坐列表')
 data_f = data_f.fillna('NaN')
 
+trainmodel = pd.read_excel(f'{database}/火车乘坐记录.xlsx', sheet_name = '车型列表')
+modelcount = {}
+for i,row in trainmodel.iterrows():
+    modelcount[row['车型']] = {'total':0,'rarity':row['稀有度'],'rate':row['现存比例']}
+
 
 airportdata = pd.read_csv(f'{database}//airports_data.csv',encoding='gb18030')
 #airportdata.head()
@@ -52,6 +57,7 @@ for i in range(len(statdataf)):
     loc = [lat,lng]
 #     loc = correct(loc)
     statgeof[statdataf['车站'][i]]=loc
+
 
 
 #总乘坐次数
@@ -177,7 +183,14 @@ charts['rides'] = [{"on":row['上车时间'].strftime('%H:%M'),
                     "distance":int(row['里程']),
                     "train":row['车次'],
                     "from":row['上车站'],
-                    "to":row['下车站']} for i,row in data.iterrows()]
+                    "to":row['下车站'],
+                    "model":row['车型']} for i,row in data.iterrows()]
+
+#车型稀有度
+for i,row in data.iterrows():
+    modelcount[row['车型']]['total'] += 1
+
+charts['model'] = modelcount
 
 
 #城市统计
@@ -193,6 +206,7 @@ for word, pinyin_list in special_places.items():
 
 
 citycount = {}
+nationcount = {}
 def city_cal(city,country,direction,lat,lng):
     if city == "NaN":
         return
@@ -203,8 +217,12 @@ def city_cal(city,country,direction,lat,lng):
     if city not in citycount.keys():
         citycount[city] = {'on':0,'off':0,'total':0,
                            'lat':lat,'lng':lng,'country':country}
+        if country not in nationcount.keys():
+            nationcount[country] = {'on':0,'off':0,'total':0}
     citycount[city][direction] += 1
     citycount[city]['total'] += 1
+    nationcount[country][direction] += 1
+    nationcount[country]['total'] += 1
 
 
 for i,row in data.iterrows():
@@ -220,7 +238,10 @@ for i,row in data_f.iterrows():
     city_cal(row['上车城市（英语）'],row['上车国家'],'on',statgeof[row['上车站']][0],statgeof[row['上车站']][1])
     city_cal(row['下车城市（英语）'],row['下车国家'],'off',statgeof[row['下车站']][0],statgeof[row['下车站']][1])
     
+citycount = dict(sorted(citycount.items(),key = lambda x:x[1]['total'],reverse = True))
+nationcount = dict(sorted(nationcount.items(),key = lambda x:x[1]['total'],reverse = True))
 charts['citycount'] = citycount;    
+charts['nationcount'] = nationcount;
 
 #车站统计
 

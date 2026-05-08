@@ -215,7 +215,7 @@
             flex-direction: column;
             transition: width 0.3s ease, opacity 0.3s;
             overflow: hidden;
-            z-index: 100;
+            z-index: 102;
             height: 100%;
         }
 
@@ -301,6 +301,7 @@
 
             .stats-panel.active {
                 display: block;
+                height:auto;
             }
 
         /* 统计卡片 */
@@ -341,6 +342,118 @@
                 margin-left: 4px;
             }
 
+        /* 车型统计面板 */
+        .train-type-sort-btn {
+            padding: 5px 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 14px;
+            color: rgba(255,255,255,0.7);
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+            .train-type-sort-btn:hover {
+                background: rgba(255,255,255,0.1);
+            }
+
+            .train-type-sort-btn.active {
+                background: #e94560;
+                border-color: #e94560;
+                color: #fff;
+            }
+
+        /* 车型表格 */
+        .train-type-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+            .train-type-table th {
+                padding: 8px 6px;
+                text-align: left;
+                font-size: 0.7rem;
+                color: rgba(255,255,255,0.5);
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+                cursor: pointer;
+                transition: color 0.2s;
+                white-space: nowrap;
+            }
+
+                .train-type-table th:hover {
+                    color: #fff;
+                }
+
+                .train-type-table th .sort-arrow {
+                    font-size: 0.6rem;
+                    margin-left: 2px;
+                }
+
+            .train-type-table td {
+                padding: 7px 6px;
+                font-size: 0.78rem;
+                color: rgba(255,255,255,0.8);
+                border-bottom: 1px solid rgba(255,255,255,0.04);
+                white-space: nowrap;
+            }
+
+            .train-type-table tr:hover td {
+                background: rgba(255,255,255,0.03);
+            }
+
+        /* 稀有度标签 */
+        .rarity-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .rarity-common {
+            background: rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.6);
+        }
+
+        .rarity-uncommon {
+            background: rgba(59,130,246,0.2);
+            color: #60a5fa;
+        }
+
+        .rarity-rare {
+            background: rgba(168,85,247,0.2);
+            color: #c084fc;
+        }
+
+        .rarity-epic {
+            background: rgba(245,158,11,0.2);
+            color: #fbbf24;
+        }
+
+        .rarity-legendary {
+            background: rgba(239,68,68,0.2);
+            color: #f87171;
+        }
+
+        /* 进度条 */
+        .rarity-bar-container {
+            width: 60px;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 6px;
+        }
+
+        .rarity-bar {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s;
+        }
                 
 
         .chart-container {
@@ -371,6 +484,7 @@
             border: none;
             border-top: 1px solid rgba(255,255,255,0.08);
             margin: 16px 0;
+            clear: both;
         }
 
         /* 右侧折叠按钮 */
@@ -414,7 +528,7 @@
             box-shadow: 0 8px 32px rgba(0,0,0,0.4);
             display: none;
             flex-direction: column;
-            z-index: 10;
+            z-index: 103;
             transition: opacity 0.2s ease;
             resize: both; /* 新增：允许用户手动调整大小 */
             min-width: 400px; /* 新增：最小宽度 */
@@ -872,9 +986,9 @@
                     </div>
                     <div class="floating-panel-body">
                         <div class="scatter-type-switch">
-                            <button class="active" data-scatter-type="time">⏰ 时间-时间</button>
-                            <button data-scatter-type="distance">📏 距离-时间</button>
-                            <button data-scatter-type="station">📍 车站分布</button>
+                            <button class="active" data-scatter-type="time">⏰ Departure-Arrival</button>
+                            <button data-scatter-type="distance">📏 Distance-Duration</button>
+                            <button data-scatter-type="station">📍 Distribution of Stations</button>
                         </div>
                         <canvas id="floatingScatterChart"></canvas>
                     </div>
@@ -997,41 +1111,38 @@
                     <!-- 概览卡片 -->
                     <div class="stats-grid" id="travelStatsGrid"></div>
 
-                    <!-- 城市排行榜 -->
-                    <div class="chart-container">
-                        <div class="chart-section-title">🏆 城市旅行排行</div>
-                        <div class="floating-chart-switch" id="cityChartSwitch">
-                            <button class="active" data-view="both">📊 总计</button>
-                            <button data-view="depart">⬆️ 出发</button>
-                            <button data-view="arrive">⬇️ 到达</button>
-                        </div>
-                        <canvas id="cityCountChart"></canvas>
-                        <div id="cityPositionIndicator" class="position-indicator"></div>
-                        <div class="city-nav">
-                            <button id="cityPrevBtn">← 上一页</button>
-                            <button id="cityNextBtn">下一页 →</button>
-                        </div>
-                    </div>
-
                     <hr class="section-divider">
 
-                    <!-- 热门城市列表 -->
-                    <div class="chart-container" id="topCitiesContainer">
-                        <div class="chart-section-title">🔥 热门城市 Top 10</div>
-                        <div id="topCitiesList" style="font-size: 0.8rem; color: rgba(255,255,255,0.7);">
+                    <!-- 浮动列表 - Top 5 旅游城市 -->
+                    <div class="topPopup" id="topTravelCitiesPopup">
+                        <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-bottom: 8px;">
+                            🏆 Most Visited Cities
+                        </div>
+                        <div id="topTravelCitiesList" style="font-size: 0.8rem;">
                             <!-- 动态生成 -->
                         </div>
                     </div>
 
-                    <hr class="section-divider">
-
-                    <!-- 旅行概况 -->
-                    <div class="chart-container">
-                        <div class="chart-section-title">ℹ️ 旅行概况</div>
-                        <div id="travelSummary" style="font-size: 0.8rem; color: rgba(255,255,255,0.7);">
+                    <!-- 浮动列表 - Top 5 外国城市 -->
+                    <div class="topPopup" id="topTravelForeignCitiesPopup">
+                        <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-bottom: 8px;">
+                            🏆 Most Visited Foreign Cities
+                        </div>
+                        <div id="topTravelForeignCitiesList" style="font-size: 0.8rem;">
                             <!-- 动态生成 -->
                         </div>
                     </div>
+
+                    <!-- 浮动列表 - Top 5 国家 -->
+                    <div class="topPopup" id="topTravelCountriesPopup">
+                        <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-bottom: 8px;">
+                            🏆 Most Visited Countries
+                        </div>
+                        <div id="topTravelCountriesList" style="font-size: 0.8rem;">
+                            <!-- 动态生成 -->
+                        </div>
+                    </div>
+
                 </div>
 
                 <!-- ========== 火车统计面板 ========== -->
@@ -1064,7 +1175,20 @@
                             <!-- 动态生成 -->
                         </div>
                     </div>
+
+                    <hr class="section-divider">
+                    <!-- 车型统计面板 -->
+                    <div class="chart-container">
+                        <div class="chart-section-title">🚂 车型统计</div>
+                        <div id="trainTypeTable" style="font-size: 0.8rem;">
+                            <!-- 动态生成 -->
+                        </div>
+                    </div>
                 </div>
+
+
+                
+
 
                 <!-- 浮动列表 - Top 5 车站 -->
                 <div class="topPopup" id="topStationsPopup">
@@ -1183,6 +1307,7 @@
                         container.classList.toggle('active', container.id === `${mapId}-container`);
                     });
 
+                    clearpopup();
                     currentMap = mapId;
 
                     // 根据地图类型切换统计面板
@@ -1267,128 +1392,207 @@
                     if (!cityData) return;
 
                     const cityArray = Object.entries(cityData);
-                    let totalDepart = 0, totalArrive = 0;
+                    const intlcityArray = cityArray.filter(function (item) {
+                        return item[1]['country'] !== 'China';
+                    });
+                    let totalDepart = 0;
                     cityArray.forEach(([_, v]) => {
                         totalDepart += v.on || 0;
-                        totalArrive += v.off || 0;
                     });
 
+                    const countryArray = Object.entries(chartsData.nationcount);
+                    console.log(cityArray)
                     // 概览卡片
                     document.getElementById('travelStatsGrid').innerHTML = `
                         <div class="stat-card">
-                            <div class="label">城市数量</div>
-                            <div class="value">${cityArray.length}<span class="unit">个</span></div>
+                            <div class="label">Total Trips</div>
+                            <div class="value">${totalDepart}<span class="unit"></span></div>
                         </div>
                         <div class="stat-card">
-                            <div class="label">总出发</div>
-                            <div class="value">${totalDepart}<span class="unit">次</span></div>
+                            <div class="label">Visited Cities</div>
+                            <div class="value">${cityArray.length}<span class="unit"></span></div>
                         </div>
                         <div class="stat-card">
-                            <div class="label">总到达</div>
-                            <div class="value">${totalArrive}<span class="unit">次</span></div>
+                            <div class="label">Visited Countries</div>
+                            <div class="value">${countryArray.length}<span class="unit"></span></div>
                         </div>
-                        <div class="stat-card">
-                            <div class="label">总旅行</div>
-                            <div class="value">${totalDepart + totalArrive}<span class="unit">次</span></div>
+                        <div class="stat-card hoverable" data-action="travel-most-visited-city">
+                            <div class="label">Most Visited City</div>
+                            <div class="value">${cityArray[0][0]}<span class="unit" style="font-size:0.7rem; margin-left:6px;">${cityArray[0][1]['total']}</span></div>
+                        </div>
+                        <div class="stat-card hoverable" data-action="travel-most-visited-foreign-city">
+                            <div class="label">Most Visited Foreign City</div>
+                            <div class="value">${intlcityArray[0][0]}<span class="unit" style="font-size:0.7rem; margin-left:6px;">${intlcityArray[0][1]['total']}</span></div>
+                        </div>
+                        <div class="stat-card hoverable" data-action="travel-most-visited-country">
+                            <div class="label">Most Visited Country</div>
+                            <div class="value">${countryArray[0][0]}<span class="unit" style="font-size:0.7rem; margin-left:6px;">${countryArray[0][1]['total']}</span></div>
                         </div>
                     `;
-
-                    // 热门城市 Top 10
-                    const sortedCities = cityArray
-                        .map(([name, v]) => ({ name, total: (v.on || 0) + (v.off || 0), on: v.on || 0, off: v.off || 0 }))
-                        .sort((a, b) => b.total - a.total)
-                        .slice(0, 10);
-
-                    const topCitiesList = document.getElementById('topCitiesList');
-                    if (topCitiesList) {
-                        topCitiesList.innerHTML = sortedCities.map((city, i) => `
-                            <div style="display: flex; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                <span style="width: 24px; text-align: center; color: ${i < 3 ? '#f59e0b' : 'rgba(255,255,255,0.5)'}; font-weight: bold;">
-                                    ${i + 1}
-                                </span>
-                                <span style="flex: 1;">${city.name}</span>
-                                <span style="color: rgba(255,255,255,0.5); font-size: 0.75rem;">
-                                    出发${city.on} | 到达${city.off}
-                                </span>
-                            </div>
-                        `).join('');
-                    }
-
-                    // 旅行概况
-                    const travelSummary = document.getElementById('travelSummary');
-                    if (travelSummary) {
-                        const mostVisited = sortedCities[0] || { name: '-', total: 0 };
-                        const uniqueCities = cityArray.length;
-
-                        travelSummary.innerHTML = `
-                            <div style="padding: 4px 0;">
-                                <span style="color: rgba(255,255,255,0.5);">最常访问城市：</span>
-                                <span style="color: #f59e0b;">${mostVisited.name}</span> (${mostVisited.total}次)
-                            </div>
-                            <div style="padding: 4px 0;">
-                                <span style="color: rgba(255,255,255,0.5);">访问城市数：</span>
-                                <span>${uniqueCities} 个</span>
-                            </div>
-                            <div style="padding: 4px 0;">
-                                <span style="color: rgba(255,255,255,0.5);">总旅行次数：</span>
-                                <span>${totalDepart + totalArrive} 次</span>
-                            </div>
-                        `;
-                    }
-
-                    drawCityCountChart();
+                    initHover(cityArray.slice(0, 5), '[data-action="travel-most-visited-city"]', 'topTravelCitiesPopup', 'topTravelCitiesList')
+                    initHover(intlcityArray.slice(0, 5), '[data-action="travel-most-visited-foreign-city"]', 'topTravelForeignCitiesPopup', 'topTravelForeignCitiesList')
+                    initHover(countryArray.slice(0, 5), '[data-action="travel-most-visited-country"]', 'topTravelCountriesPopup', 'topTravelCountriesList')
                 }
+                    
+                // ========== 悬浮事件 ==========
 
-                function drawCityCountChart() {
-                    const canvas = document.getElementById('cityCountChart');
-                    if (!canvas || !cityData) return;
 
-                    const ctx = canvas.getContext('2d');
+                function initHover(data, card_name, popup_name, list_name) {
+                    const card = document.querySelector(card_name);
+                    const popup = document.getElementById(popup_name);
 
-                    let processedData = Object.entries(cityData).map(([city, v]) => ({
-                        city, on: v.on || 0, off: v.off || 0, total: (v.on || 0) + (v.off || 0)
-                    }));
+                    if (!card || !popup) return;
 
-                    if (currentCityView === 'depart') processedData.sort((a, b) => b.on - a.on);
-                    else if (currentCityView === 'arrive') processedData.sort((a, b) => b.off - a.off);
-                    else processedData.sort((a, b) => b.total - a.total);
+                    let hideTimeout;
 
-                    const totalCities = processedData.length;
-                    const startIdx = currentCityIndex * CITIES_PER_PAGE;
-                    const endIdx = Math.min(startIdx + CITIES_PER_PAGE, totalCities);
-                    const visibleData = processedData.slice(startIdx, endIdx);
+                    
+                    // 生成列表 HTML
+                    function initList(data) {
 
-                    document.getElementById('cityPositionIndicator').textContent =
-                        `${startIdx + 1}-${endIdx} / ${totalCities} 城市`;
-                    document.getElementById('cityPrevBtn').disabled = currentCityIndex === 0;
-                    document.getElementById('cityNextBtn').disabled = currentCityIndex >= Math.ceil(totalCities / CITIES_PER_PAGE) - 1;
+                        document.getElementById(list_name).innerHTML = '';
+                        data.forEach((item, index) => {
+                            let rankClass = 'normal';
+                            if (index === 0) rankClass = 'top-1';
+                            else if (index === 1) rankClass = 'top-2';
+                            else if (index === 2) rankClass = 'top-3';
 
-                    if (cityChartInstance) cityChartInstance.destroy();
+                            document.getElementById(list_name).innerHTML += `<div class="top-item" id="${list_name}_${item[0]}">
+                                                <span class="top-rank ${rankClass}">${index + 1}</span>
+                                                <span class="top-name" title="${item[0]}">${item[0]}<span class="top-count">${item[1]['country']||''}</span></span>
+                                                <span class="top-count">${item[1]['total']}</span>
+                                            </div>
+                                            `;
+                        });
+                        data.forEach((item, index) => {
+                            let top_card = document.getElementById(`${list_name}_${item[0]}`);
+                            top_card.addEventListener('mouseenter', function (e) {
+                                top_card.style.background = 'rgba(0,255,255,0.08)';
+                            });
 
-                    cityChartInstance = new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: visibleData.map(d => d.city),
-                            datasets: [
-                                { label: '出发', data: visibleData.map(d => d.on), backgroundColor: '#f97316', borderRadius: 4, hidden: currentCityView === 'arrive' },
-                                { label: '到达', data: visibleData.map(d => d.off), backgroundColor: '#3b82f6', borderRadius: 4, hidden: currentCityView === 'depart' }
-                            ]
-                        },
-                        options: {
-                            responsive: true, maintainAspectRatio: true,
-                            plugins: { legend: { labels: { color: '#fff' } }, title: { display: true, text: '城市旅行统计', color: '#fff' } },
-                            scales: {
-                                x: { ticks: { color: 'rgba(255,255,255,0.7)', maxRotation: 45 }, grid: { color: 'rgba(255,255,255,0.1)' } },
-                                y: { ticks: { color: 'rgba(255,255,255,0.7)' }, grid: { color: 'rgba(255,255,255,0.1)' }, beginAtZero: true }
-                            }
+                            top_card.addEventListener('mouseleave', function () {
+                                // 延迟隐藏，防止快速划过闪烁
+                                setTimeout(() => {
+                                    // 恢复卡片样式
+                                    top_card.style.background = '';
+                                }, 150);
+                            });
+                        })
+                        return;
+                    }
+
+                    if (data.length > 0) {
+                        // 渲染列表
+                        initList(data);
+                    }
+
+                    // 定位弹出列表
+                    function positionPopup(cardRect) {
+                        const popupWidth = popup.offsetWidth || 220;
+                        const popupHeight = popup.offsetHeight || 200;
+
+                        // 默认显示在卡片右侧
+                        let left = cardRect.left - popupWidth - 12;
+                        let top = cardRect.top + (cardRect.height - popupHeight) / 2;
+
+
+
+                        // 确保不超出屏幕
+                        top = Math.max(10, Math.min(window.innerHeight - popupHeight - 10, top));
+
+                        popup.style.left = left + 'px';
+                        popup.style.top = top + 'px';
+                    }
+
+                    card.addEventListener('mouseenter', function (e) {
+
+                        clearpopup();
+
+                        // 清除隐藏定时器
+                        clearTimeout(hideTimeout);
+
+                        // 高亮卡片
+                        card.style.background = 'rgba(233, 69, 96, 0.15)';
+                        card.style.border = '1px solid rgba(233, 69, 96, 0.4)';
+                        card.style.cursor = 'pointer';
+
+
+
+
+                        if (data.length > 0) {
+
+                            // 定位弹出列表
+                            const cardRect = card.getBoundingClientRect();
+                            popup.style.display = 'block';
+
+                            // 先显示再定位（需要获取实际尺寸）
+                            requestAnimationFrame(() => {
+                                positionPopup(cardRect);
+                            });
+
+
                         }
                     });
+
+
+                    hide = true;
+                    card.addEventListener('mouseleave', function () {
+                        // 延迟隐藏，防止快速划过闪烁
+                        if (!hide) clearTimeout(hideTimeout);
+                        else {
+                            hideTimeout = setTimeout(() => {
+                                // 恢复卡片样式
+                                card.style.background = '';
+                                card.style.border = '';
+
+                                // 隐藏弹出列表
+                                popup.style.display = 'none';
+
+
+                            }, 150);
+                        }
+
+                    });
+
+                    // 弹出列表本身也能保持显示 点击or移入
+
+                    card.addEventListener('click', function () {
+                        hide = !hide;
+                        if (!hide) clearTimeout(hideTimeout);
+                        else {
+                            hideTimeout = setTimeout(() => {
+                                card.style.background = '';
+                                card.style.border = '';
+                                popup.style.display = 'none';
+
+                            }, 150);
+                        }
+                    });
+
+                    popup.addEventListener('mouseenter', function () {
+                        clearTimeout(hideTimeout);
+                    });
+
+                    popup.addEventListener('mouseleave', function () {
+                        if (!hide) clearTimeout(hideTimeout);
+                        else {
+                            hideTimeout = setTimeout(() => {
+                                card.style.background = '';
+                                card.style.border = '';
+                                popup.style.display = 'none';
+
+                            }, 150);
+                        }
+                    });
+
+
                 }
+                
 
                 // ========== 火车统计 ==========
                 async function loadTrainStats() {
                     if (!statsData) await loadAllData();
                     if (!statsData) return;
+
 
                     // 概览卡片
                     document.getElementById('trainStatsGrid').innerHTML = `
@@ -1425,7 +1629,7 @@
                             <div class="value">${statsData.railway_city_top[0]}<span class="unit" style="font-size:0.7rem; margin-left:6px;">${statsData.railway_city_top[1]}次</span></div>
                         </div>
                         <div class="stat-card hoverable" data-action="most-visited-prov">
-                            <div class="label">Most Visited City</div>
+                            <div class="label">Most Visited Prov</div>
                             <div class="value">${statsData.railway_prov_top[0]}<span class="unit" style="font-size:0.7rem; margin-left:6px;">${statsData.railway_prov_top[1]}次</span></div>
                         </div>
 
@@ -1555,6 +1759,11 @@
                     initMostVisitedStationHover();
                     initMostVisitedCityHover();
                     initMostVisitedProvHover();
+
+                    // 加载车型统计
+                    trainTypeData = getTrainTypeStats();
+                    sortDirection = [];
+                    renderTrainTypeTable('count');
                 }
 
                 function drawTrainOverviewChart() {
@@ -1610,10 +1819,178 @@
                     });
                 }
 
+                // ========== 车型统计 ==========
+                
+                let currentTrainSort = 'count';    // count, rarity, name
+                let trainTypeData = [];
+                let sortDirection = {};  // 记录每个列的排序方向
+
+                function getTrainTypeStats() {
+                    if (!chartsData || !chartsData.model) return [];
+
+                    const modelData = chartsData.model;
+                    const totalTrips = Object.values(modelData).reduce((sum, m) => sum + (m.total || 0), 0);
+
+                    return Object.entries(modelData).map(([modelName, modelInfo]) => {
+                        // 直接用你定义的稀有度
+                        const rarityLevel = modelInfo.rarity || '普通';
+
+                        // 根据稀有度等级分配样式类
+                        let rarityClass;
+                        switch (rarityLevel) {
+                            case '传说':
+                                rarityClass = 'rarity-legendary';
+                                break;
+                            case '史诗':
+                                rarityClass = 'rarity-epic';
+                                break;
+                            case '稀有':
+                                rarityClass = 'rarity-rare';
+                                break;
+                            default:
+                                rarityClass = 'rarity-common';
+                        }
+
+                        // 稀有度排序权重（越小越稀有）
+                        const rarityWeight = {
+                            '传说': 1,
+                            '史诗': 2,
+                            '稀有': 3,
+                            '普通': 4
+                        };
+
+                        return {
+                            type: modelName,
+                            count: modelInfo.total || 0,
+                            percentage: modelInfo.rate * 100,
+                            rarityLevel: rarityLevel,
+                            rarityClass: rarityClass,
+                            rarityWeight: rarityWeight[rarityLevel] || 5
+                        };
+                    });
+                }
+
+                // 修改排序函数
+                function sortTrainTypes(sortBy) {
+                    if (sortDirection[sortBy] === undefined) {
+                        sortDirection[sortBy] = 'desc';
+                    } else {
+                        sortDirection[sortBy] = sortDirection[sortBy] === 'desc' ? 'asc' : 'desc';
+                    }
+
+                    const direction = sortDirection[sortBy];
+
+                    return [...trainTypeData].sort((a, b) => {
+                        let comparison;
+
+                        switch (sortBy) {
+                            case 'count':
+                                comparison = a.count - b.count;
+                                break;
+                            case 'rarity':
+                                // 稀有度权重小的排前面
+                                comparison = b.rarityWeight - a.rarityWeight;
+                                break;
+                            case 'name':
+                                comparison = a.type.localeCompare(b.type);
+                                break;
+                            case 'percentage':
+                                comparison = a.percentage - b.percentage;
+                                break;
+                            default:
+                                comparison = 0;
+                        }
+
+                        return direction === 'asc' ? comparison : -comparison;
+                    });
+                }
+
+                function renderTrainTypeTable(sortby) {
+                    currentTrainSort = sortby;
+                    const container = document.getElementById('trainTypeTable');
+                    if (!container) return;
+
+                    const sortedData = sortTrainTypes(currentTrainSort);
+
+                    const sortArrow = (col) => {
+                        if (col !== currentTrainSort) return '';
+                        return sortDirection[col] === 'asc' ? ' ▲' : ' ▼';
+                    };
+
+                    let html = `
+        <table class="train-type-table">
+            <thead>
+                <tr>
+                    <th id="sortname" style="cursor:pointer;">
+                        车型${sortArrow('name')}
+                    </th>
+                    <th id="sortcount" style="cursor:pointer; text-align:center;">
+                        次数${sortArrow('count')}
+                    </th>
+                    <th id="sortrarity" style="cursor:pointer; text-align:center;">
+                        稀有度${sortArrow('rarity')}
+                    </th>
+                    <th id="sortpercentage" style="cursor:pointer; text-align:right;">
+                        稀有度${sortArrow('percentage')}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+                    
+
+                    const maxCount = Math.max(...sortedData.map(d => d.count), 1);
+
+                    sortedData.forEach(d => {
+                        const barWidth = (d.count / maxCount * 100).toFixed(0);
+
+                        const NA = "N/A";
+                        html += `
+            <tr>
+                <td>
+                    <span style="font-weight: 500;">${d.type}</span>
+                </td>
+                <td style="text-align: center; font-weight: 500;">
+                    ${d.count}
+                    <div class="rarity-bar-container">
+                        <div class="rarity-bar" style="width: ${barWidth}%; background: #e94560;"></div>
+                    </div>
+                </td>
+                <td style="text-align: center;">
+                    <span class="rarity-badge ${d.rarityClass}">${d.rarityLevel}</span>
+                </td>
+                <td style="text-align: right; color: rgba(255,255,255,0.5);">
+                    ${d.percentage ? d.percentage.toFixed(1):NA}%
+                </td>
+            </tr>
+        `;
+                        
+                    });
+
+                    html += '</tbody></table>';
+
+                    html += `
+        <div style="margin-top: 10px; font-size: 0.7rem; color: rgba(255,255,255,0.4); text-align: center;">
+            共 ${sortedData.length} 种车型 | ${sortedData.reduce((s, d) => s + d.count, 0)} 次行程
+        </div>
+    `;
+
+                    container.innerHTML = html;
+                    document.getElementById('sortname').addEventListener('click', () => renderTrainTypeTable('name'));
+                    document.getElementById('sortcount').addEventListener('click', () => renderTrainTypeTable('count'));
+                    document.getElementById('sortrarity').addEventListener('click', () => renderTrainTypeTable('rarity'));
+                    document.getElementById('sortpercentage').addEventListener('click', () => renderTrainTypeTable('percentage'));
+                }
+
+                
+
+
                 // ========== clear popup ==========
                 let hide = true;
                 function clearpopup() {
-                    [["topStationsPopup", '[data-action="most-visited-station"]'], ["topCitiesPopup", '[data-action="most-visited-city"]'], ["topProvsPopup", '[data-action="most-visited-prov"]']].forEach(([p, c]) => {
+                    [["topStationsPopup", '[data-action="most-visited-station"]'], ["topCitiesPopup", '[data-action="most-visited-city"]'], ["topProvsPopup", '[data-action="most-visited-prov"]'],
+                        ["topTravelCitiesPopup", '[data-action="travel-most-visited-city"]'], ["topTravelForeignCitiesPopup", '[data-action="travel-most-visited-foreign-city"]'],
+                        ["topTravelCountriesPopup", '[data-action="travel-most-visited-country"]']].forEach(([p, c]) => {
                         let pup = document.getElementById(p);
                         if (pup && pup.style.display != "none") {
                             hide = true;
@@ -3298,25 +3675,7 @@
                     });
                 });
 
-                // 城市图表视图切换
-                document.querySelectorAll('#cityChartSwitch button').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        document.querySelectorAll('#cityChartSwitch button').forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                        currentCityView = btn.dataset.view;
-                        currentCityIndex = 0;
-                        drawCityCountChart();
-                    });
-                });
-
-                document.getElementById('cityPrevBtn')?.addEventListener('click', () => {
-                    if (currentCityIndex > 0) { currentCityIndex--; drawCityCountChart(); }
-                });
-
-                document.getElementById('cityNextBtn')?.addEventListener('click', () => {
-                    const maxPages = Math.ceil(Object.keys(cityData || {}).length / CITIES_PER_PAGE);
-                    if (currentCityIndex < maxPages - 1) { currentCityIndex++; drawCityCountChart(); }
-                });
+                
 
                 // ========== 浮动面板拖拽 ==========
                 function makeDraggable(panel, header) {
