@@ -8,6 +8,7 @@ import datetime
 import sys
 import json
 from pypinyin import lazy_pinyin,load_phrases_dict
+import re
 
 database = sys.argv[1]
 output = sys.argv[2]
@@ -22,6 +23,11 @@ trainmodel = pd.read_excel(f'{database}/火车乘坐记录.xlsx', sheet_name = '车型列
 modelcount = {}
 for i,row in trainmodel.iterrows():
     modelcount[row['车型']] = {'total':0,'rarity':row['稀有度'],'rate':row['现存比例']}
+
+allaircraftlist = pd.read_excel(f'{database}/飞机乘坐记录.xlsx', sheet_name = 'type')
+allaircraft = {}
+for i,row in allaircraftlist.iterrows():
+    allaircraft[row['type']]={'total':0,'rarity':row['rarity'],'company':row['company'],'fullname':row['origin']}
 
 
 airportdata = pd.read_csv(f'{database}//airports_data.csv',encoding='gb18030')
@@ -192,10 +198,82 @@ for i,row in data.iterrows():
 
 charts['model'] = modelcount
 
+#机型统计
+
+aircrafts = {}
+for i,row in data_air.iterrows():
+    name = row['机型']
+    t = row['type']
+    if name not in aircrafts.keys():
+        aircrafts[name] = {'total':0,'company':row['公司'],'rarity':allaircraft[t]['rarity']}
+    aircrafts[name]['total'] += 1
+    allaircraft[t]['total'] += 1
+
+charts['aircrafts'] = aircrafts
+charts['allaircrafts'] = allaircraft
+
+#航空公司统计
+
+airlines = {}
+for i,row in data_air.iterrows():
+    name = row['airlines']
+    if name not in airlines.keys():
+        alliance = row['alliance'] if type(row['alliance']) != float else ''
+        img = 'pic/'+row['pic']+'.png'
+        allianceimg = 'pic/'+alliance+'.png' if type(alliance) != float else ''
+        airlines[name] = {'total':0,'alliance':alliance,'img':img,'allianceimg':allianceimg,'nationality':row['nationality']}
+    airlines[name]['total'] += 1
+
+charts['airlines'] = airlines
+#机场统计
+
+airportcount = {}
+
+northernmost = {"name":'nan',"lat":-90,"lng":0} #车站名，纬度，经度
+southernmost = {"name":'nan',"lat":90,"lng":0} #车站名，纬度，经度
+easternmost = {"name":'nan',"lat":0,"lng":-180} #车站名，纬度，经度
+westernmost = {"name":'nan',"lat":0,"lng":180} #车站名，纬度，经度
+
+def airport_cal(airport,iata,direction,city,country,mostairport= False):
+    if airport == 'NaN':
+        return
+    airport = re.sub(r'(international|airport)', '', airport, flags=re.IGNORECASE)
+    airport = ' '.join(airport.split())  # 清理多余空格
+    if airport not in airportcount.keys():
+        
+        lat = airportgeo[iata][0]
+        lng = airportgeo[iata][1]
+        airportcount[airport] = {'on':0,'off':0,'total':0,'iata':iata,'city':city,'country':country,'lat':lat,'lng':lng}
+           
+        if mostairport:
+            global northernmost,southernmost,easternmost,westernmost
+            if lat > northernmost['lat']:
+                northernmost = {'name':airport,'lat':lat,'lng':lng}
+            if lat < southernmost['lat']:
+                southernmost = {'name':airport,'lat':lat,'lng':lng}
+            if lng > easternmost['lng']:
+                easternmost = {'name':airport,'lat':lat,'lng':lng}
+            if lng < westernmost['lng']:
+                westernmost = {'name':airport,'lat':lat,'lng':lng}
+
+    airport_info = airportcount[airport]
+    airport_info[direction] += 1
+    airport_info['total'] += 1
+
+for i,row in data_air.iterrows():
+    airport_cal(row['起飞EN'],row['start'],'on',row['起飞城市EN'],row['起飞国家'],True)
+    airport_cal(row['降落EN'],row['depart'],'off',row['降落城市EN'],row['降落国家'],True) #'arrive' is mistakenly writen as 'depart'
+
+airportcount = dict(sorted(airportcount.items(),key = lambda x:x[1]['total'],reverse = True))
+charts['airportcount'] = airportcount
+stats['northernmost_air'] = northernmost
+stats['southernmost_air'] = southernmost
+stats['easternmost_air'] = easternmost
+stats['westernmost_air'] = westernmost
 
 #城市统计
 special_places = {
-    '六安': [['lù'], ['ān']],
+    '六安': [['lù'], ['\'ān']],
     '重庆': [['chóng'], ['qìng']],
     '厦门': [['xià'], ['mén']]
 }
@@ -213,6 +291,7 @@ def city_cal(city,country,direction,lat,lng):
 
     if city == "Xianggang":
         city = "Hong Kong"
+        country = "Hong Kong (China)"
 
     if city not in citycount.keys():
         citycount[city] = {'on':0,'off':0,'total':0,

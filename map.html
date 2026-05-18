@@ -342,36 +342,25 @@
                 margin-left: 4px;
             }
 
-        /* 车型统计面板 */
-        .train-type-sort-btn {
-            padding: 5px 12px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 14px;
-            color: rgba(255,255,255,0.7);
-            font-size: 0.7rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            white-space: nowrap;
+        /* CSS 部分 */
+        .airline-logo {
+            width: 55px;
+            height: auto;
+            background-color: rgba(255,255,255,0.8);
+            padding: 2px;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
-            .train-type-sort-btn:hover {
-                background: rgba(255,255,255,0.1);
-            }
-
-            .train-type-sort-btn.active {
-                background: #e94560;
-                border-color: #e94560;
-                color: #fff;
-            }
+        
 
         /* 车型表格 */
-        .train-type-table {
+        .type-table {
             width: 100%;
             border-collapse: collapse;
         }
 
-            .train-type-table th {
+            .type-table th {
                 padding: 8px 6px;
                 text-align: left;
                 font-size: 0.7rem;
@@ -382,16 +371,16 @@
                 white-space: nowrap;
             }
 
-                .train-type-table th:hover {
+                .type-table th:hover {
                     color: #fff;
                 }
 
-                .train-type-table th .sort-arrow {
+                .type-table th .sort-arrow {
                     font-size: 0.6rem;
                     margin-left: 2px;
                 }
 
-            .train-type-table td {
+            .type-table td {
                 padding: 7px 6px;
                 font-size: 0.78rem;
                 color: rgba(255,255,255,0.8);
@@ -399,7 +388,7 @@
                 white-space: nowrap;
             }
 
-            .train-type-table tr:hover td {
+            .type-table tr:hover td {
                 background: rgba(255,255,255,0.03);
             }
 
@@ -456,7 +445,7 @@
         }
                 
 
-        .chart-container {
+        /*.chart-container {
             background: rgba(255,255,255,0.03);
             border-radius: 10px;
             padding: 12px;
@@ -467,7 +456,108 @@
                 width: 100% !important;
                 height: auto !important;
                 max-height: 220px;
+            }*/
+
+        /* 主卡片容器 — 就像一本打开的书页效果 */
+        .chart-container {
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 14px;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        
+
+        /* 每个标签页 — 活页夹效果 */
+        .tab-btn {
+            background: #e2e8f0;
+            border: none;
+            padding: 0rem 0.2rem 0rem 0.2rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            font-family: inherit;
+            color: #334155;
+            cursor: pointer;
+            border-radius: 12px 12px 0 0;
+            transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            letter-spacing: 0.3px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(2px);
+            box-shadow: 0 -1px 1px rgba(0, 0, 0, 0.02);
+            margin-right: 2px;
+            position: relative;
+        }
+
+
+            /* 激活的标签页 — 像当前阅读的书页，白底凸起 */
+            .tab-btn.active {
+                background: rgba(255,255,255,0.03);
+                box-shadow: 0 -3px 8px rgba(0, 0, 0, 0.02), 0 1px 0 rgba(255,255,255,0.03);
+                border-top: 2px solid #3b82f6;
+                border-left: 1px solid #e2e8f0;
+                border-right: 1px solid #e2e8f0;
+                transform: translateY(-2px);
+                color: #fff;
+                margin-bottom: 8px;
+                align-items: center;
+                gap: 6px;
             }
+
+                .tab-btn.active::before {
+                    content: '';
+                    position: absolute;
+                    bottom: -1px;
+                    left: 0;
+                    width: 100%;
+                    height: 2px;
+                    background: rgba(255,255,255,0.03);
+                }
+
+            .tab-btn:not(.active):hover {
+                background: #d9e2ef;
+                color: #0f172a;
+                transform: translateY(-1px);
+            }
+
+        
+
+       
+
+        /* 装饰性统计脚注 */
+        .stat-footer {
+            margin-top: 1.2rem;
+            font-size: 0.7rem;
+            color: #5b6e8c;
+            text-align: right;
+            border-top: 1px dashed #e4e9f0;
+            padding-top: 0.9rem;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge-icon {
+            background: #eef2ff;
+            padding: 0.2rem 0.6rem;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #2563eb;
+        }
+
+
+        
+        /* 让两个按钮之间产生立体层次感 */
+        .tab-btn + .tab-btn {
+            margin-left: -2px;
+        }
 
         .chart-section-title {
             font-size: 0.8rem;
@@ -1113,6 +1203,29 @@
 
                     <hr class="section-divider">
 
+                    <!-- 航空公司统计面板 -->
+                    <div class="chart-container">
+                        <!-- 书页式标签栏：完全类似浏览器顶端的书签样式 -->
+                        <div class="tabs-header" style="display: flex; gap: 0.25rem; height: 40px">
+                            <button class="tab-btn active" id="tabAirlinesBtn"> Flown Airlines </button>
+                            <button class="tab-btn" id="tabCitiesBtn"> Visited Cities </button>
+                            <button class="tab-btn" id="tabAirportsBtn"> Visited Airports </button>
+                            <button class="tab-btn" id="tabAircraftsBtn"> Flown Aircrafts </button>
+                            <button class="tab-btn" id="tabAllAircraftsBtn"> All Aircrafts </button>
+                        </div>
+                        <div id="AirlinesTable" style="font-size: 0.8rem;width:100%; display: block">
+                        </div>
+                        <div id="CitiesTable" style="font-size: 0.8rem; width: 100%; display: none ">
+                        </div>
+                        <div id="AirportsTable" style="font-size: 0.8rem; width: 100%; display: none ">
+                        </div>
+                        <div id="AircraftsTable" style="font-size: 0.8rem; width: 100%; display: none ">
+                        </div>
+                        <div id="AllAircraftsTable" style="font-size: 0.8rem; width: 100%; display: none ">
+                        </div>
+
+                    </div>
+
                     <!-- 浮动列表 - Top 5 旅游城市 -->
                     <div class="topPopup" id="topTravelCitiesPopup">
                         <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-bottom: 8px;">
@@ -1139,6 +1252,16 @@
                             🏆 Most Visited Countries
                         </div>
                         <div id="topTravelCountriesList" style="font-size: 0.8rem;">
+                            <!-- 动态生成 -->
+                        </div>
+                    </div>
+
+                    <!-- 浮动列表 - Top 5 机场 -->
+                    <div class="topPopup" id="topAirportsPopup">
+                        <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-bottom: 8px;">
+                            🏆 Most Visited Airports
+                        </div>
+                        <div id="topAirportsList" style="font-size: 0.8rem;">
                             <!-- 动态生成 -->
                         </div>
                     </div>
@@ -1401,6 +1524,8 @@
                     });
 
                     const countryArray = Object.entries(chartsData.nationcount);
+
+                    const AirportArray = Object.entries(chartsData.airportcount);
                     console.log(cityArray)
                     // 概览卡片
                     document.getElementById('travelStatsGrid').innerHTML = `
@@ -1413,7 +1538,7 @@
                             <div class="value">${cityArray.length}<span class="unit"></span></div>
                         </div>
                         <div class="stat-card">
-                            <div class="label">Visited Countries</div>
+                            <div class="label">Visited Regions</div>
                             <div class="value">${countryArray.length}<span class="unit"></span></div>
                         </div>
                         <div class="stat-card hoverable" data-action="travel-most-visited-city">
@@ -1425,15 +1550,776 @@
                             <div class="value">${intlcityArray[0][0]}<span class="unit" style="font-size:0.7rem; margin-left:6px;">${intlcityArray[0][1]['total']}</span></div>
                         </div>
                         <div class="stat-card hoverable" data-action="travel-most-visited-country">
-                            <div class="label">Most Visited Country</div>
+                            <div class="label">Most Visited Region</div>
                             <div class="value">${countryArray[0][0]}<span class="unit" style="font-size:0.7rem; margin-left:6px;">${countryArray[0][1]['total']}</span></div>
                         </div>
+                        <div class="stat-card">
+                            <div class="label">Visited Airports</div>
+                            <div class="value">${AirportArray.length}<span class="unit"></span></div>
+                        </div>
+                        <div class="stat-card hoverable" data-action="travel-most-visited-airport">
+                            <div class="label">Most Visited Airport</div>
+                            <div class="value">
+                            <span style="font-size:0.7rem; margin-left:0px;">${AirportArray[0][0]}</span>
+                            <span class="unit" style="font-size:0.7rem; margin-left:6px;">${AirportArray[0][1]['total']}</span>
+                            </div>
+                        </div>
+
                     `;
                     initHover(cityArray.slice(0, 5), '[data-action="travel-most-visited-city"]', 'topTravelCitiesPopup', 'topTravelCitiesList')
                     initHover(intlcityArray.slice(0, 5), '[data-action="travel-most-visited-foreign-city"]', 'topTravelForeignCitiesPopup', 'topTravelForeignCitiesList')
                     initHover(countryArray.slice(0, 5), '[data-action="travel-most-visited-country"]', 'topTravelCountriesPopup', 'topTravelCountriesList')
+                    initHover(AirportArray.slice(0, 5), '[data-action="travel-most-visited-airport"]', 'topAirportsPopup', 'topAirportsList')
+
+                    // 加载统计
+                    airlinesData = getAirlinesStats();
+                    sortDirection_airlines = [];
+                    renderairlinesTable('count');
+
+                    citiesData_air = getCitiesStats_air();
+                    sortDirection_cities_air = [];
+                    rendercitiesTable_air('count');
+
+                    airportsData = getAirportsStats();
+                    sortDirection_airports = [];
+                    renderairportsTable('count');
+
+                    aircraftsData = getAircraftsStats();
+                    sortDirection_aircrafts = [];
+                    renderaircraftsTable('count');
+
+                    AllAircraftsData = getAllAircraftsStats();
+                    sortDirection_AllAircrafts = [];
+                    renderAllAircraftsTable('count');
+
+
+                    const typelist = ['Airlines', 'Cities', 'Airports','Aircrafts','AllAircrafts'];
+                    typelist.forEach(type => {
+                        const btn =  `tab${type}Btn`;
+                        document.getElementById(btn).addEventListener('click', (e) => {
+                            if (e.target.classList.contains('active')) {
+                                return;
+                            };
+                            typelist.forEach(t => {
+                                document.getElementById(`tab${t}Btn`).classList.remove('active');
+                                document.getElementById(`${t}Table`).style.display = 'none';
+                            });
+                            document.getElementById(`tab${type}Btn`).classList.add('active');
+                            document.getElementById(`${type}Table`).style.display = 'block';
+
+                        });
+
+                    });
+
                 }
+
+                // ========== 航空公司统计 ==========
+
+                let currentAirlinesSort = 'count';    // count, name, alliance
+                let airlinesData = [];
+                let sortDirection_airlines = {};  // 记录每个列的排序方向
+
+                function getAirlinesStats() {
+                    if (!chartsData || !chartsData.airlines) return [];
+
+                    const airlinesData = chartsData.airlines;
+                    const totalTrips = Object.values(airlinesData).reduce((sum, m) => sum + (m.total || 0), 0);
+
+                    return Object.entries(airlinesData).map(([airlines, airlinesInfo]) => {
+                        
+                        return {
+                            airlines: airlines,
+                            count: airlinesInfo.total || 0,
+                            alliance: airlinesInfo.alliance || '',
+                            allianceimg: airlinesInfo.allianceimg || '',
+                            img: airlinesInfo.img || '',
+                            nationality: airlinesInfo.nationality || '',
+
+                        };
+                    });
+                }
+
+                // 修改排序函数
+                function sortAirlines(sortBy) {
+                    if (sortDirection_airlines[sortBy] === undefined) {
+                        sortDirection_airlines[sortBy] = 'desc';
+                    } else {
+                        sortDirection_airlines[sortBy] = sortDirection_airlines[sortBy] === 'desc' ? 'asc' : 'desc';
+                    }
+
+                    const direction = sortDirection_airlines[sortBy];
+
+                    return [...airlinesData].sort((a, b) => {
+                        let comparison;
+
+                        switch (sortBy) {
+                            case 'count':
+                                comparison = a.count - b.count;
+                                break;
+                            case 'name':
+                                comparison = a.airlines.localeCompare(b.airlines);
+                                break;
+                            case 'alliance':
+                                comparison = a.alliance.localeCompare(b.alliance);
+                                break;
+                            default:
+                                comparison = 0;
+                        }
+
+                        return direction === 'asc' ? comparison : -comparison;
+                    });
+                }
+
+                function renderairlinesTable(sortby) {
+                    currentAirlinesSort = sortby;
+                    const container = document.getElementById('AirlinesTable');
+                    if (!container) return;
+
+                    const sortedData_airlines = sortAirlines(currentAirlinesSort);
+
+                    const sortArrow = (col) => {
+                        if (col !== currentAirlinesSort) return '';
+                        return sortDirection_airlines[col] === 'asc' ? ' ▲' : ' ▼';
+                    };
+
+                    let html = `
+        <table class="type-table" id="Airlines-table">
+            <thead>
+                <tr>
+
+                    <th id="sortalliance_air" style="cursor:pointer; text-align:center;">
+                        Alliance${sortArrow('alliance')}
+                    </th>
+                    <th id="sortname_air" style="cursor:pointer;text-align:center;">
+                        Airlines${sortArrow('name')}
+                    </th>
+                    <th id="sortcount_air" style="cursor:pointer; text-align:center;">
+                        Count${sortArrow('count')}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+
+                    const maxCount = Math.max(...sortedData_airlines.map(d => d.count), 1);
+
+                    sortedData_airlines.forEach(d => {
+
+                        const barWidth = (d.count / maxCount * 100).toFixed(0);
+                        html += `
+            <tr>
+                <td style="text-align: center; padding:2px 2px;">
+                    <img src="${d.allianceimg}" alt="${d.alliance}"class="airline-logo" style="height:18px; width:auto" onerror="this.style.display='none'">
+                </td>
+                <td>
+                    <img src="${d.img}" alt="${d.airlines}" class="airline-logo" onerror="this.style.display='none'">
+                
+                    <span style="font-weight: 500;font-size:0.65rem;">${d.airlines}</span>
+                </td>
+                <td style="text-align: center; font-weight: 500;padding:2px 2px;">
+                    ${d.count}
+                    <div class="rarity-bar-container">
+                        <div class="rarity-bar" style="width: ${barWidth}%; background: #e94560;"></div>
+                    </div>
+                </td>
+                
+            </tr>
+        `;
+
+                    });
+
+                    html += '</tbody></table>';
+
+                    html += `
+        <div style="margin-top: 10px; font-size: 0.7rem; color: rgba(255,255,255,0.4); text-align: center;">
+            I have flown ${sortedData_airlines.length} airlines
+        </div>
+        
+    `;
+                    [['Sky Team',18],['Star Alliance',25],['Oneworld',15]].forEach(([a,t]) => {
+
+                        let src = 'pic/' + a + '.png';
+                        let adata = sortedData_airlines.filter(item => item.alliance === a);
+
+                        html += `
+                        <div style="margin-top: 10px; font-size: 0.7rem; color: rgba(255,255,255,0.4); text-align: center;">
+                    <img src="${src}" alt="${a}" class="airline-logo" style="height:18px; width:auto" onerror="this.style.display='none'">
+                    ${adata.reduce((sum,item)=>sum+(item.count || 0),0)} times ${adata.length}/${t} airlines 
+        </div>
+                        `;
+                    });
+
+
+                    container.innerHTML = html;
+                    document.getElementById('sortname_air').addEventListener('click', () => renderairlinesTable('name'));
+                    document.getElementById('sortcount_air').addEventListener('click', () => renderairlinesTable('count'));
+                    document.getElementById('sortalliance_air').addEventListener('click', () => renderairlinesTable('alliance'));
+                }
+
+
+                // ========== 城市统计 ==========
+
+                let currentCitiesSort_air = 'count';    // count, city, country
+                let citiesData_air = [];
+                let sortDirection_cities_air = {};  // 记录每个列的排序方向
+
+                function getCitiesStats_air() {
+                    if (!chartsData || !chartsData.citycount) return [];
+
+                    const citiesData_air = chartsData.citycount;
+
+                    return Object.entries(citiesData_air).map(([city, cityInfo]) => {
+
+                        return {
+                            city: city,
+                            count: cityInfo.total || 0,
+                            country: cityInfo.country || '',
+
+                        };
+                    });
+                }
+
+                // 修改排序函数
+                function sortCities_air(sortBy) {
+                    if (sortDirection_cities_air[sortBy] === undefined) {
+                        sortDirection_cities_air[sortBy] = 'desc';
+                    } else {
+                        sortDirection_cities_air[sortBy] = sortDirection_cities_air[sortBy] === 'desc' ? 'asc' : 'desc';
+                    }
+
+                    const direction = sortDirection_cities_air[sortBy];
+
+                    return [...citiesData_air].sort((a, b) => {
+                        let comparison;
+
+                        switch (sortBy) {
+                            case 'count':
+                                comparison = a.count - b.count;
+                                break;
+                            case 'city':
+                                comparison = a.city.localeCompare(b.city);
+                                break;
+                            case 'country':
+                                comparison = a.country.localeCompare(b.country);
+                                break;
+                            default:
+                                comparison = 0;
+                        }
+
+                        return direction === 'asc' ? comparison : -comparison;
+                    });
+                }
+
+                function rendercitiesTable_air(sortby) {
+                    currentCitiesSort_air = sortby;
+                    const container = document.getElementById('CitiesTable');
+                    if (!container) return;
+
+                    const sortedData_cities_air = sortCities_air(currentCitiesSort_air);
+
+                    const sortArrow = (col) => {
+                        if (col !== currentCitiesSort_air) return '';
+                        return sortDirection_cities_air[col] === 'asc' ? ' ▲' : ' ▼';
+                    };
+
+                    let html = `
+        <table class="type-table" id="Cities_air-table">
+            <thead>
+                <tr>
+                    <th id="sortcountry_air" style="cursor:pointer; text-align:center;">
+                        Country${sortArrow('country')}
+                    </th>
+                    <th id="sortcity_air" style="cursor:pointer; text-align:center;">
+                        City${sortArrow('city')}
+                    </th>
+                    <th id="sortcount_city_air" style="cursor:pointer;text-align:center;">
+                        Counts${sortArrow('count')}
+                    </th>
                     
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+
+                    const maxCount = Math.max(...sortedData_cities_air.map(d => d.count), 1);
+
+                    sortedData_cities_air.forEach(d => {
+
+                        const barWidth = (d.count / maxCount * 100).toFixed(0);
+                        html += `
+            <tr>
+                <td style="text-align: center;">
+                    <span style="font-weight: 300;font-size:0.7rem;">${d.country}</span>
+                </td>
+                <td>
+                    
+                    <span style="font-weight: 300;font-size:0.7rem;">${d.city}</span>
+                </td>
+                <td style="text-align: center; font-weight: 500;">
+                    ${d.count}
+                    <div class="rarity-bar-container">
+                        <div class="rarity-bar" style="width: ${barWidth}%; background: #e94560;"></div>
+                    </div>
+                </td>
+                
+            </tr>
+        `;
+
+                    });
+
+                    html += '</tbody></table>';
+
+                    
+
+
+                    container.innerHTML = html;
+                    document.getElementById('sortcountry_air').addEventListener('click', () => rendercitiesTable_air('country'));
+                    document.getElementById('sortcity_air').addEventListener('click', () => rendercitiesTable_air('city'));
+                    document.getElementById('sortcount_city_air').addEventListener('click', () => rendercitiesTable_air('count'));
+                }
+
+                // ========== 机场统计 ==========
+
+                let currentAirportsSort = 'count';    // count, airport, country
+                let airportsData = [];
+                let sortDirection_airports = {};  // 记录每个列的排序方向
+
+                function getAirportsStats() {
+                    if (!chartsData || !chartsData.airportcount) return [];
+
+                    const airportsData = chartsData.airportcount;
+
+                    return Object.entries(airportsData).map(([airport, airportInfo]) => {
+
+                        return {
+                            airport: airport,
+                            count: airportInfo.total || 0,
+                            city: airportInfo.city || '',
+                            country: airportInfo.country || '',
+
+                        };
+                    });
+                }
+
+                // 修改排序函数
+                function sortAirports(sortBy) {
+                    if (sortDirection_airports[sortBy] === undefined) {
+                        sortDirection_airports[sortBy] = 'desc';
+                    } else {
+                        sortDirection_airports[sortBy] = sortDirection_airports[sortBy] === 'desc' ? 'asc' : 'desc';
+                    }
+
+                    const direction = sortDirection_airports[sortBy];
+
+                    return [...airportsData].sort((a, b) => {
+                        let comparison;
+
+                        switch (sortBy) {
+                            case 'count':
+                                comparison = a.count - b.count;
+                                break;
+                            case 'airport':
+                                comparison = a.airport.localeCompare(b.airport);
+                                break;
+                            case 'country':
+                                comparison = a.country.localeCompare(b.country);
+                                break;
+                            default:
+                                comparison = 0;
+                        }
+
+                        return direction === 'asc' ? comparison : -comparison;
+                    });
+                }
+
+                function renderairportsTable(sortby) {
+                    currentAirportsSort = sortby;
+                    const container = document.getElementById('AirportsTable');
+                    if (!container) return;
+
+                    const sortedData_airports = sortAirports(currentAirportsSort);
+
+                    const sortArrow = (col) => {
+                        if (col !== currentAirportsSort) return '';
+                        return sortDirection_airports[col] === 'asc' ? ' ▲' : ' ▼';
+                    };
+
+                    let html = `
+        <table class="type-table" id="Airports-table">
+            <thead>
+                <tr>
+                    <th id="sortcountry_airport" style="cursor:pointer;text-align:center;">
+                        Country${sortArrow('country')}
+                    </th>
+                    <th id="sortairport" style="cursor:pointer; text-align:center;">
+                        Airport${sortArrow('airport')}
+                    </th>
+                    <th id="sortcount_airport" style="cursor:pointer; text-align:center;">
+                        Count${sortArrow('count')}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+
+                    const maxCount = Math.max(...sortedData_airports.map(d => d.count), 1);
+
+                    sortedData_airports.forEach(d => {
+
+                        const barWidth = (d.count / maxCount * 100).toFixed(0);
+                        html += `
+            <tr>
+                <td style="text-align: center;">
+                    <span style="font-weight: 500;font-size:0.65rem;padding:0.3rem;">${d.country}</span>
+                </td>
+                <td>
+                    <span style="font-weight: 500;font-size:0.65rem;padding:0.3rem;">${d.airport}</span>
+                </td>
+                <td style="text-align: center; font-weight: 500;">
+                    ${d.count}
+                    <div class="rarity-bar-container">
+                        <div class="rarity-bar" style="width: ${barWidth}%; background: #e94560;"></div>
+                    </div>
+                </td>
+                
+            </tr>
+        `;
+
+                    });
+
+                    html += '</tbody></table>';
+
+
+
+                    container.innerHTML = html;
+                    document.getElementById('sortcountry_airport').addEventListener('click', () => renderairportsTable('country'));
+                    document.getElementById('sortairport').addEventListener('click', () => renderairportsTable('airport'));
+                    document.getElementById('sortcount_airport').addEventListener('click', () => renderairportsTable('count'));
+                }
+                // ========== 飞机机型统计 ==========
+
+                let currentAircraftsSort = 'count';    // count, airpcraft, company, rarity
+                let aircraftsData = [];
+                let sortDirection_aircrafts = {};  // 记录每个列的排序方向
+
+                function getAircraftsStats() {
+                    if (!chartsData || !chartsData.aircrafts) return [];
+
+                    const aircraftsData = chartsData.aircrafts;
+                    
+
+                    return Object.entries(aircraftsData).map(([aircraft, aircraftInfo]) => {
+                        // 直接用你定义的稀有度
+                        const rarityLevel = aircraftInfo.rarity || '普通';
+
+                        // 根据稀有度等级分配样式类
+                        let rarityClass;
+                        switch (rarityLevel) {
+                            case 'legendary':
+                                rarityClass = 'rarity-legendary';
+                                break;
+                            case 'epic':
+                                rarityClass = 'rarity-epic';
+                                break;
+                            case 'rare':
+                                rarityClass = 'rarity-rare';
+                                break;
+                            case 'retired':
+                                rarityClass = 'rarity-uncommon';
+                                break;
+                            default:
+                                rarityClass = 'rarity-common';
+                        }
+
+                        // 稀有度排序权重（越小越稀有）
+                        const rarityWeight = {
+                            'legendary': 1,
+                            'epic': 2,
+                            'rare': 3,
+                            'common': 4,
+                            'retired': 0.5
+                        };
+
+                        return {
+                            aircraft: aircraft,
+                            count: aircraftInfo.total || 0,
+                            company: aircraftInfo.company || '',
+
+                            rarityLevel: rarityLevel,
+                            rarityClass: rarityClass,
+                            rarityWeight: rarityWeight[rarityLevel] || 5,
+                        };
+                    });
+                }
+
+                // 修改排序函数
+                function sortAircrafts(sortBy) {
+                    if (sortDirection_aircrafts[sortBy] === undefined) {
+                        sortDirection_aircrafts[sortBy] = 'desc';
+                    } else {
+                        sortDirection_aircrafts[sortBy] = sortDirection_aircrafts[sortBy] === 'desc' ? 'asc' : 'desc';
+                    }
+
+                    const direction = sortDirection_aircrafts[sortBy];
+
+                    return [...aircraftsData].sort((a, b) => {
+                        let comparison;
+
+                        switch (sortBy) {
+                            case 'count':
+                                comparison = a.count - b.count;
+                                break;
+                            case 'aircraft':
+                                comparison = a.aircraft.localeCompare(b.aircraft);
+                                break;
+                            case 'company':
+                                comparison = a.company.localeCompare(b.company);
+                                break;
+                            case 'rarity':
+                                comparison = b.rarityWeight - a.rarityWeight;
+                                break;
+                            default:
+                                comparison = 0;
+                        }
+
+                        return direction === 'asc' ? comparison : -comparison;
+                    });
+                }
+
+                function renderaircraftsTable(sortby) {
+                    currentAircraftsSort = sortby;
+                    const container = document.getElementById('AircraftsTable');
+                    if (!container) return;
+
+                    const sortedData_aircrafts = sortAircrafts(currentAircraftsSort);
+
+                    const sortArrow = (col) => {
+                        if (col !== currentAircraftsSort) return '';
+                        return sortDirection_aircrafts[col] === 'asc' ? ' ▲' : ' ▼';
+                    };
+
+                    let html = `
+        <table class="type-table" id="Aircrafts-table">
+            <thead>
+                <tr>
+                    <th id="sortcompany_aircraft" style="cursor:pointer;text-align:center;">
+                        Company${sortArrow('company')}
+                    </th>
+                    <th id="sortaircraft" style="cursor:pointer; text-align:center;">
+                        Aircraft${sortArrow('aircraft')}
+                    </th>
+                    <th id="sortcount_aircraft" style="cursor:pointer; text-align:center;">
+                        Count${sortArrow('count')}
+                    </th>
+                    <th id="sortrarity_aircraft" style="cursor:pointer; text-align:center;">
+                        rarity${sortArrow('rarity')}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+
+                    const maxCount = Math.max(...sortedData_aircrafts.map(d => d.count), 1);
+
+                    sortedData_aircrafts.forEach(d => {
+
+                        const barWidth = (d.count / maxCount * 100).toFixed(0);
+                        html += `
+            <tr>
+                <td style="text-align: center;">
+                    <span style="font-weight: 500;font-size:0.65rem;padding:0.3rem;">${d.company}</span>
+                </td>
+                <td>
+                    <span style="font-weight: 500;font-size:0.65rem;padding:0.3rem;">${d.aircraft}</span>
+                </td>
+                <td style="text-align: center; font-weight: 500;">
+                    ${d.count}
+                    <div class="rarity-bar-container">
+                        <div class="rarity-bar" style="width: ${barWidth}%; background: #e94560;"></div>
+                    </div>
+                </td>
+                <td style="text-align: center;">
+                    <span class="rarity-badge ${d.rarityClass}">${d.rarityLevel}</span>
+                </td>
+                
+            </tr>
+        `;
+
+                    });
+
+                    html += '</tbody></table>';
+
+
+
+                    container.innerHTML = html;
+                    document.getElementById('sortcompany_aircraft').addEventListener('click', () => renderaircraftsTable('company'));
+                    document.getElementById('sortaircraft').addEventListener('click', () => renderaircraftsTable('aircraft'));
+                    document.getElementById('sortcount_aircraft').addEventListener('click', () => renderaircraftsTable('count'));
+
+                    document.getElementById('sortrarity_aircraft').addEventListener('click', () => renderaircraftsTable('rarity'));
+                }
+
+                // ========== 所有飞机机型统计 ==========
+
+                let currentAllAircraftsSort = 'count';    // count, airpcraft, company, rarity
+                let AllAircraftsData = [];
+                let sortDirection_AllAircrafts = {};  // 记录每个列的排序方向
+
+                function getAllAircraftsStats() {
+                    if (!chartsData || !chartsData.allaircrafts) return [];
+
+                    const AllAircraftsData = chartsData.allaircrafts;
+
+
+                    return Object.entries(AllAircraftsData).map(([aircraft, aircraftInfo]) => {
+                        // 直接用你定义的稀有度
+                        const rarityLevel = aircraftInfo.rarity || '普通';
+
+                        // 根据稀有度等级分配样式类
+                        let rarityClass;
+                        switch (rarityLevel) {
+                            case 'legendary':
+                                rarityClass = 'rarity-legendary';
+                                break;
+                            case 'epic':
+                                rarityClass = 'rarity-epic';
+                                break;
+                            case 'rare':
+                                rarityClass = 'rarity-rare';
+                                break;
+                            case 'retired':
+                                rarityClass = 'rarity-uncommon';
+                                break;
+                            default:
+                                rarityClass = 'rarity-common';
+                        }
+
+                        // 稀有度排序权重（越小越稀有）
+                        const rarityWeight = {
+                            'legendary': 1,
+                            'epic': 2,
+                            'rare': 3,
+                            'common': 4,
+                            'retired':0.5
+                        };
+
+                        return {
+                            aircraft: aircraft,
+                            count: aircraftInfo.total || 0,
+                            company: aircraftInfo.company || '',
+                            fullname: aircraftInfo.fullname || '',
+                            rarityLevel: rarityLevel,
+                            rarityClass: rarityClass,
+                            rarityWeight: rarityWeight[rarityLevel] || 5,
+                        };
+                    });
+                }
+
+                // 修改排序函数
+                function sortAllAircrafts(sortBy) {
+                    if (sortDirection_AllAircrafts[sortBy] === undefined) {
+                        sortDirection_AllAircrafts[sortBy] = 'desc';
+                    } else {
+                        sortDirection_AllAircrafts[sortBy] = sortDirection_AllAircrafts[sortBy] === 'desc' ? 'asc' : 'desc';
+                    }
+
+                    const direction = sortDirection_AllAircrafts[sortBy];
+
+                    return [...AllAircraftsData].sort((a, b) => {
+                        let comparison;
+
+                        switch (sortBy) {
+                            case 'count':
+                                comparison = a.count - b.count;
+                                break;
+                            case 'aircraft':
+                                comparison = a.fullname.localeCompare(b.fullname);
+                                break;
+                            case 'company':
+                                comparison = a.company.localeCompare(b.company);
+                                break;
+                            case 'rarity':
+                                comparison = b.rarityWeight - a.rarityWeight;
+                                break;
+                            default:
+                                comparison = 0;
+                        }
+
+                        return direction === 'asc' ? comparison : -comparison;
+                    });
+                }
+
+                function renderAllAircraftsTable(sortby) {
+                    currentAllAircraftsSort = sortby;
+                    const container = document.getElementById('AllAircraftsTable');
+                    if (!container) return;
+
+                    const sortedData_AllAircrafts = sortAllAircrafts(currentAllAircraftsSort);
+
+                    const sortArrow = (col) => {
+                        if (col !== currentAllAircraftsSort) return '';
+                        return sortDirection_AllAircrafts[col] === 'asc' ? ' ▲' : ' ▼';
+                    };
+
+                    let html = `
+        <table class="type-table" id="AllAircrafts-table">
+            <thead>
+                <tr>
+                    <th id="sortAllAircraft" style="cursor:pointer; text-align:center;">
+                        Aircraft${sortArrow('aircraft')}
+                    </th>
+                    <th id="sortcount_AllAircraft" style="cursor:pointer; text-align:center;">
+                        Count${sortArrow('count')}
+                    </th>
+                    <th id="sortrarity_AllAircraft" style="cursor:pointer; text-align:center;">
+                        rarity${sortArrow('rarity')}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+
+                    const maxCount = Math.max(...sortedData_AllAircrafts.map(d => d.count), 1);
+
+                    sortedData_AllAircrafts.forEach(d => {
+
+                        const barWidth = (d.count / maxCount * 100).toFixed(0);
+                        html += `
+            <tr>
+                <td>
+                    <span style="font-weight: 500;font-size:0.6rem;padding:0.1rem;">${d.fullname}</span>
+                </td>
+                <td style="text-align: center; font-weight: 500;">
+                    ${d.count}
+                    <div class="rarity-bar-container">
+                        <div class="rarity-bar" style="width: ${barWidth}%; background: #e94560;"></div>
+                    </div>
+                </td>
+                <td style="text-align: center;">
+                    <span class="rarity-badge ${d.rarityClass}">${d.rarityLevel}</span>
+                </td>
+                
+            </tr>
+        `;
+
+                    });
+
+                    html += '</tbody></table>';
+
+
+
+                    container.innerHTML = html;
+                    document.getElementById('sortAllAircraft').addEventListener('click', () => renderAllAircraftsTable('aircraft'));
+                    document.getElementById('sortcount_AllAircraft').addEventListener('click', () => renderAllAircraftsTable('count'));
+
+                    document.getElementById('sortrarity_AllAircraft').addEventListener('click', () => renderAllAircraftsTable('rarity'));
+                }
+
                 // ========== 悬浮事件 ==========
 
 
@@ -1918,7 +2804,7 @@
                     };
 
                     let html = `
-        <table class="train-type-table">
+        <table class="type-table" id="train-type-table">
             <thead>
                 <tr>
                     <th id="sortname" style="cursor:pointer;">
@@ -1942,8 +2828,8 @@
                     const maxCount = Math.max(...sortedData.map(d => d.count), 1);
 
                     sortedData.forEach(d => {
-                        const barWidth = (d.count / maxCount * 100).toFixed(0);
 
+                        const barWidth = (d.count / maxCount * 100).toFixed(0);
                         const NA = "N/A";
                         html += `
             <tr>
@@ -1971,9 +2857,19 @@
 
                     html += `
         <div style="margin-top: 10px; font-size: 0.7rem; color: rgba(255,255,255,0.4); text-align: center;">
-            共 ${sortedData.length} 种车型 | ${sortedData.reduce((s, d) => s + d.count, 0)} 次行程
+            共打卡 ${sortedData.filter(item => item.count !== 0).length}/${sortedData.length} 种车型
         </div>
+        
     `;
+                    [['rarity-legendary', '传说'], ['rarity-epic', '史诗'], ['rarity-rare', '稀有'], ['rarity-common', '普通']].forEach(([c, l]) => {   
+                        console.log(c,l)
+                        html += `
+                        <div style="margin-top: 10px; font-size: 0.7rem; color: rgba(255,255,255,0.4); text-align: center;">
+                    <span class="rarity-badge ${c}">${l}</span> ${sortedData.filter(item => item.rarityClass === c && item.count !== 0).length}/${sortedData.filter(item => item.rarityClass === c).length} 
+        </div>
+                        `;
+                    });
+                    
 
                     container.innerHTML = html;
                     document.getElementById('sortname').addEventListener('click', () => renderTrainTypeTable('name'));
@@ -1990,7 +2886,7 @@
                 function clearpopup() {
                     [["topStationsPopup", '[data-action="most-visited-station"]'], ["topCitiesPopup", '[data-action="most-visited-city"]'], ["topProvsPopup", '[data-action="most-visited-prov"]'],
                         ["topTravelCitiesPopup", '[data-action="travel-most-visited-city"]'], ["topTravelForeignCitiesPopup", '[data-action="travel-most-visited-foreign-city"]'],
-                        ["topTravelCountriesPopup", '[data-action="travel-most-visited-country"]']].forEach(([p, c]) => {
+                        ["topTravelCountriesPopup", '[data-action="travel-most-visited-country"]'], ["topAirportsPopup", '[data-action="travel-most-visited-airport"]']].forEach(([p, c]) => {
                         let pup = document.getElementById(p);
                         if (pup && pup.style.display != "none") {
                             hide = true;
