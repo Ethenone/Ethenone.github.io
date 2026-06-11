@@ -1203,7 +1203,7 @@
 
                     <hr class="section-divider">
 
-                    <!-- 航空公司统计面板 -->
+                    <!-- 统计面板 -->
                     <div class="chart-container">
                         <!-- 书页式标签栏：完全类似浏览器顶端的书签样式 -->
                         <div class="tabs-header" style="display: flex; gap: 0.25rem; height: 40px">
@@ -1300,13 +1300,27 @@
                     </div>
 
                     <hr class="section-divider">
-                    <!-- 车型统计面板 -->
+                    <!-- 统计面板 -->
                     <div class="chart-container">
-                        <div class="chart-section-title">🚂 车型统计</div>
-                        <div id="trainTypeTable" style="font-size: 0.8rem;">
+                        <!-- 书页式标签栏：完全类似浏览器顶端的书签样式 -->
+                        <div class="tabs-header" style="display: flex; gap: 0.25rem; height: 40px">
+                            <button class="tab-btn active" id="tabtrainTypeBtn"> 车型统计 </button>
+                            <button class="tab-btn" id="tabStationsBtn"> 车站统计 </button>
+                            <button class="tab-btn" id="tabTrainCitiesBtn"> 城市统计 </button>
+                        </div>
+                        <div id="trainTypeTable" style="font-size: 0.8rem; width: 100%; display: block">
+                            <!-- 动态生成 -->
+                        </div>
+                        <div id="StationsTable" style="font-size: 0.8rem; width: 100%; display: block">
+                            <!-- 动态生成 -->
+                        </div>
+                        <div id="TrainCitiesTable" style="font-size: 0.8rem; width: 100%; display: block">
                             <!-- 动态生成 -->
                         </div>
                     </div>
+
+                    
+
                 </div>
 
 
@@ -2646,10 +2660,38 @@
                     initMostVisitedCityHover();
                     initMostVisitedProvHover();
 
-                    // 加载车型统计
+                    // 加载统计
                     trainTypeData = getTrainTypeStats();
                     sortDirection = [];
                     renderTrainTypeTable('count');
+
+                    StationsData = getTopStations();
+                    sortDirection_Stations = [];
+                    renderStationsTable('count');
+
+                    TrainCitiesData = getTopCities();
+                    sortDirection_TrainCities = [];
+                    renderTrainCitiesTable('count');
+
+
+                    const typelist = ['trainType', 'Stations', 'TrainCities'];
+                    typelist.forEach(type => {
+                        const btn = `tab${type}Btn`;
+                        document.getElementById(btn).addEventListener('click', (e) => {
+                            if (e.target.classList.contains('active')) {
+                                return;
+                            };
+                            typelist.forEach(t => {
+                                document.getElementById(`tab${t}Btn`).classList.remove('active');
+                                document.getElementById(`${t}Table`).style.display = 'none';
+                            });
+                            document.getElementById(`tab${type}Btn`).classList.add('active');
+                            document.getElementById(`${type}Table`).style.display = 'block';
+
+                        });
+
+                    });
+
                 }
 
                 function drawTrainOverviewChart() {
@@ -2703,6 +2745,248 @@
                             }
                         }
                     });
+                }
+
+                // ========== 车站统计 ==========
+
+                let currentStationsSort = 'count';    // count, name, lat, lng
+                let StationsData = [];
+                let sortDirection_Stations = {};  // 记录每个列的排序方向
+
+                // 修改排序函数
+                function sortStations(sortBy) {
+                    if (sortDirection_Stations[sortBy] === undefined) {
+                        sortDirection_Stations[sortBy] = 'desc';
+                    } else {
+                        sortDirection_Stations[sortBy] = sortDirection_Stations[sortBy] === 'desc' ? 'asc' : 'desc';
+                    }
+
+                    const direction = sortDirection_Stations[sortBy];
+
+                    return [...StationsData].sort((a, b) => {
+                        let comparison;
+
+                        switch (sortBy) {
+                            case 'count':
+                                comparison = a.total - b.total;
+                                break;
+                            case 'name':
+                                comparison = a.name.localeCompare(b.name);
+                                break;
+                            case 'lat':
+                                comparison = a.lat - b.lat;
+                                break;
+                            case 'lng':
+                                comparison = a.lng - b.lng;
+                                break;
+                            default:
+                                comparison = 0;
+                        }
+
+                        return direction === 'asc' ? comparison : -comparison;
+                    });
+                }
+
+                function renderStationsTable(sortby) {
+                    currentStationsSort = sortby;
+                    const container = document.getElementById('StationsTable');
+                    if (!container) return;
+
+                    const sortedData_Stations = sortStations(currentStationsSort);
+
+                    const sortArrow = (col) => {
+                        if (col !== currentStationsSort) return '';
+                        return sortDirection_Stations[col] === 'asc' ? ' ▲' : ' ▼';
+                    };
+
+                    let html = `
+        <table class="type-table" id="Cities_air-table">
+            <thead>
+                <tr>
+                    <th id="sortstation" style="cursor:pointer; text-align:center;">
+                        Station${sortArrow('name')}
+                    </th>
+                    <th id="sortlat" style="cursor:pointer; text-align:center;">
+                        Lat${sortArrow('lat')}
+                    </th>
+                    <th id="sortlng" style="cursor:pointer; text-align:center;">
+                        Lng${sortArrow('lng')}
+                    </th>
+                    <th id="sortcount_station" style="cursor:pointer;text-align:center;">
+                        Count${sortArrow('count')}
+                    </th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+
+                    const maxCount = Math.max(...sortedData_Stations.map(d => d.total), 1);
+
+                    sortedData_Stations.forEach(d => {
+
+                        const barWidth = (d.total / maxCount * 100).toFixed(0);
+                        html += `
+            <tr id="station_${d.name}">
+                
+                <td>
+                    <span style="font-weight: 300;font-size:0.7rem;" title="${d.province} ${d.city}">${d.name}</span>
+                </td>
+                <td>
+                    <span style="font-weight: 300;font-size:0.7rem;">${d.lat.toFixed(2)}</span>
+                </td>
+                <td>
+                    <span style="font-weight: 300;font-size:0.7rem;">${d.lng.toFixed(2)}</span>
+                </td>
+                <td style="text-align: center; font-weight: 500;">
+                    ${d.total}
+                    <div class="rarity-bar-container">
+                        <div class="rarity-bar" style="width: ${barWidth}%; background: #e94560;"></div>
+                    </div>
+                </td>
+                
+            </tr>
+        `;
+
+                    });
+
+                    html += '</tbody></table>';
+
+
+
+
+                    container.innerHTML = html;
+
+                    sortedData_Stations.forEach(d => {
+                        document.getElementById(`station_${d.name}`).addEventListener('mouseenter', function () {
+                            const mapFrame = document.getElementById("map2Iframe");
+                            mapFrame.contentWindow.postMessage({
+                                type: "highlight_station",
+                                station: d.name
+                            }, "*");
+                        });
+                    });
+                    document.getElementById('sortstation').addEventListener('click', () => renderStationsTable('name'));
+                    document.getElementById('sortlng').addEventListener('click', () => renderStationsTable('lng'));
+
+                    document.getElementById('sortlat').addEventListener('click', () => renderStationsTable('lat'));
+                    document.getElementById('sortcount_station').addEventListener('click', () => renderStationsTable('count'));
+                }
+
+                // ========== 城市统计 ==========
+
+                let currentTrainCitiesSort = 'count';    // count, city, prov
+                let TrainCitiesData = [];
+                let sortDirection_TrainCities = {};  // 记录每个列的排序方向
+
+                // 修改排序函数
+                function sortTrainCities(sortBy) {
+                    if (sortDirection_TrainCities[sortBy] === undefined) {
+                        sortDirection_TrainCities[sortBy] = 'desc';
+                    } else {
+                        sortDirection_TrainCities[sortBy] = sortDirection_TrainCities[sortBy] === 'desc' ? 'asc' : 'desc';
+                    }
+
+                    const direction = sortDirection_TrainCities[sortBy];
+
+                    return [...TrainCitiesData].sort((a, b) => {
+                        let comparison;
+
+                        switch (sortBy) {
+                            case 'count':
+                                comparison = a.total - b.total;
+                                break;
+                            case 'city':
+                                comparison = a.name.localeCompare(b.name);
+                                break;
+                            case 'prov':
+                                comparison = a.province.localeCompare(b.province);
+                                break;
+                            default:
+                                comparison = 0;
+                        }
+
+                        return direction === 'asc' ? comparison : -comparison;
+                    });
+                }
+
+                function renderTrainCitiesTable(sortby) {
+                    currentTrainCitiesSort = sortby;
+                    const container = document.getElementById('TrainCitiesTable');
+                    if (!container) return;
+
+                    const sortedData_TrainCities = sortTrainCities(currentTrainCitiesSort);
+
+                    const sortArrow = (col) => {
+                        if (col !== currentTrainCitiesSort) return '';
+                        return sortDirection_TrainCities[col] === 'asc' ? ' ▲' : ' ▼';
+                    };
+
+                    let html = `
+        <table class="type-table" id="Cities_air-table">
+            <thead>
+                <tr>
+                    <th id="sortprov" style="cursor:pointer; text-align:center;">
+                        Prov${sortArrow('prov')}
+                    </th>
+                    <th id="sortcity" style="cursor:pointer; text-align:center;">
+                        City${sortArrow('city')}
+                    </th>
+                    <th id="sortcount_city" style="cursor:pointer;text-align:center;">
+                        Count${sortArrow('count')}
+                    </th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+
+                    const maxCount = Math.max(...sortedData_TrainCities.map(d => d.total), 1);
+
+                    sortedData_TrainCities.forEach(d => {
+
+                        const barWidth = (d.total / maxCount * 100).toFixed(0);
+                        html += `
+            <tr id="city_${d.name}">
+                <td style="text-align: center;" >
+                    <span style="font-weight: 300;font-size:0.7rem;">${d.province}</span>
+                </td>
+                <td>
+                    <span style="font-weight: 300;font-size:0.7rem;">${d.name}</span>
+                </td>
+                <td style="text-align: center; font-weight: 500;">
+                    ${d.total}
+                    <div class="rarity-bar-container">
+                        <div class="rarity-bar" style="width: ${barWidth}%; background: #e94560;"></div>
+                    </div>
+                </td>
+                
+            </tr>
+        `;
+
+                    });
+
+                    html += '</tbody></table>';
+
+
+
+
+                    container.innerHTML = html;
+                    sortedData_TrainCities.forEach(d => {
+                        document.getElementById(`city_${d.name}`).addEventListener("mouseenter", function () {
+                            let mapFrame = document.getElementById("map2Iframe");
+                            mapFrame.contentWindow.postMessage({
+                                type: "highlight_city",
+                                city: d.name
+                            }, "*");
+                        });
+                    });
+
+                    document.getElementById('sortprov').addEventListener('click', () => renderTrainCitiesTable('prov'));
+                    document.getElementById('sortcity').addEventListener('click', () => renderTrainCitiesTable('city'));
+                    document.getElementById('sortcount_city').addEventListener('click', () => renderTrainCitiesTable('count'));
                 }
 
                 // ========== 车型统计 ==========
@@ -2902,6 +3186,26 @@
 
                 // ========== Most Visited Station 悬浮事件 ==========
 
+                // 计算 Top 5 车站
+                function getTopStations() {
+                    if (!chartsData || !chartsData.stationcount) return [];
+
+                    const stations = Object.entries(chartsData.stationcount)
+                        .map(([name, data]) => ({
+                            name,
+                            total: data.total || 0,
+                            on: data.on || 0,
+                            off: data.off || 0,
+                            lat: data.lat || 0,
+                            lng: data.lng || 0,
+                            bureau: data.bureau || '',
+                            city: data.city || '',
+                            province: data.province ||''
+                        }))
+                        .sort((a, b) => b.total - a.total);
+
+                    return stations;
+                }
 
                 function initMostVisitedStationHover() {
                     const card = document.querySelector('[data-action="most-visited-station"]');
@@ -2911,23 +3215,7 @@
 
                     let hideTimeout;
 
-                    // 计算 Top 5 车站
-                    function getTopStations() {
-                        if (!chartsData || !chartsData.stationcount) return [];
-
-                        const stations = Object.entries(chartsData.stationcount)
-                            .map(([name, data]) => ({
-                                name,
-                                total: data.total || 0,
-                                on: data.on || 0,
-                                off: data.off || 0,
-                                bureau: data.bureau || ''
-                            }))
-                            .sort((a, b) => b.total - a.total)
-                            .slice(0, 5);
-
-                        return stations;
-                    }
+                   
 
                     // 生成列表 HTML
                     function init_renderTopStationsList(stations) {
@@ -2969,7 +3257,7 @@
                     }
 
                     // 获取 Top 5 数据
-                    const topStations = getTopStations();
+                    const topStations = getTopStations().slice(0,5);
                     if (topStations.length > 0) {
                         // 渲染列表
                         init_renderTopStationsList(topStations);
@@ -3079,6 +3367,40 @@
 
 
                 // ========== Most Visited City 悬浮事件 ==========
+
+                // 计算 Top 5 城市
+                function getTopCities() {
+                    if (!chartsData || !chartsData.stationcount) return [];
+
+                    const cityStats = {};
+
+                    Object.entries(chartsData.stationcount).forEach(([name, data]) => {
+                        const city = data.city || '未知城市';
+
+                        if (!cityStats[city]) {
+                            cityStats[city] = {
+                                name: city,
+                                province: data.province || '',
+                                total: 0,
+                                on: 0,
+                                off: 0,
+                                stations: []  // 该城市的车站列表
+                            };
+                        }
+
+                        cityStats[city].total += data.total || 0;
+                        cityStats[city].on += data.on || 0;
+                        cityStats[city].off += data.off || 0;
+                        cityStats[city].stations.push(name);
+                    });
+
+                    // 排序取 Top 5
+                    const topCities = Object.values(cityStats)
+                        .sort((a, b) => b.total - a.total);
+
+                    return topCities;
+                }
+
                 function initMostVisitedCityHover() {
                     const card = document.querySelector('[data-action="most-visited-city"]');
                     const popup = document.getElementById('topCitiesPopup');
@@ -3087,39 +3409,7 @@
 
                     let hideTimeout;
 
-                    // 计算 Top 5 城市
-                    function getTopCities() {
-                        if (!chartsData || !chartsData.stationcount) return [];
-
-                        const cityStats = {};
-
-                        Object.entries(chartsData.stationcount).forEach(([name, data]) => {
-                            const city = data.city || '未知城市';
-
-                            if (!cityStats[city]) {
-                                cityStats[city] = {
-                                    name: city,
-                                    province: data.province || '',
-                                    total: 0,
-                                    on: 0,
-                                    off: 0,
-                                    stations: []  // 该城市的车站列表
-                                };
-                            }
-
-                            cityStats[city].total += data.total || 0;
-                            cityStats[city].on += data.on || 0;
-                            cityStats[city].off += data.off || 0;
-                            cityStats[city].stations.push(name);
-                        });
-
-                        // 排序取 Top 5
-                        const topCities = Object.values(cityStats)
-                            .sort((a, b) => b.total - a.total)
-                            .slice(0, 5);
-
-                        return topCities;
-                    }
+                    
 
                     // 生成列表 HTML
                     function init_renderTopCitiesList(cities) {
@@ -3161,7 +3451,7 @@
                     }
 
                     // 获取 Top 5 数据
-                    const topCities = getTopCities();
+                    const topCities = getTopCities().slice(0,5);
                     if (topCities.length > 0) {
                         // 渲染列表
                         init_renderTopCitiesList(topCities);
