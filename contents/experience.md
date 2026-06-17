@@ -38,8 +38,22 @@ Awarded in the Graduation Project Exhibition Competition (9/90)
 
 - Collected plasma samples from patients and performed laboratory validation.
 
-- Established a complete workflow for cfDNA-based cancer detection, integrating computational screening, lab validation, and data analysis.
-
 - Established a complete workflow combining computational screening, lab validation, and data analysis for cfDNA-based cancer detection.
 
-- Patent applied and manuscript published.
+- Patent applied and manuscript accepted.
+
+---
+
+### **Cancer detection based on deep learning methods using fragment-level methylation patterns**
+
+**September 2025 – Present | Supervisor: Dr. Yani Kang (SJTU)**
+
+---
+
+### **Research on cancer cells variation when preserving in vitro**
+
+**September 2025 – Present | Supervisor: Dr. Yani Kang (SJTU) & Prof. Zhifeng Shao (SJTU)**
+
+
+
+

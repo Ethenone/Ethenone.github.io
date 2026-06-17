@@ -5,7 +5,9 @@
 #### Email
 
 <code>2404794221@qq.com</code>  
+
 <code>ethenone@sjtu.edu.cn</code> 
+
 <code>wangtc2003@outlook.com</code>
 
 #### Education
@@ -16,7 +18,5 @@
 • Average Score: 88.7/100
 
 **Shanghai Jiao Tong University**, Shanghai, School of Biomedical Engineering, M. S. in Biology (2025.9 - 2028.3 expected)
-
-
 
 

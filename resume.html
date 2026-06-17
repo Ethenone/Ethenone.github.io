@@ -23,9 +23,93 @@
     <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,400;1,400&amp;display=swap"
           rel="stylesheet" />
 
+    <!-- Chinese fonts (only used in 中文 mode) -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&amp;family=Noto+Serif+SC:wght@500;600;700&amp;display=swap"
+          rel="stylesheet" />
+
     <!-- Core theme CSS (includes Bootstrap)-->
     <link type="text/css" href="static/css/styles.css" rel="stylesheet" />
     <link type="text/css" href="static/css/main.css" rel="stylesheet" />
+
+    <!-- Language toggle button styling -->
+    <style>
+        #lang-toggle,
+        #print-btn {
+            cursor: pointer;
+            border: 1px solid currentColor;
+            border-radius: 999px;
+            padding: 0.15rem 0.85rem;
+            font-weight: 700;
+            line-height: 1.4;
+            text-align: center;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        #lang-toggle { min-width: 3.2rem; }
+        #print-btn { margin-right: 0.5rem; }
+        #lang-toggle:hover,
+        #print-btn:hover {
+            background-color: rgba(0, 0, 0, 0.06);
+        }
+
+        /* ===== 中文字体（仅在中文模式下生效，英文模式不受影响）===== */
+        /* 正文用黑体 Noto Sans SC */
+        html[lang="zh-CN"] body,
+        html[lang="zh-CN"] .main-body,
+        html[lang="zh-CN"] .navbar,
+        html[lang="zh-CN"] p,
+        html[lang="zh-CN"] li,
+        html[lang="zh-CN"] a,
+        html[lang="zh-CN"] span,
+        html[lang="zh-CN"] td,
+        html[lang="zh-CN"] th {
+            font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Mulish", sans-serif;
+        }
+        /* 标题用宋体 Noto Serif SC，呼应原本英文标题的衬线风格 */
+        html[lang="zh-CN"] h1,
+        html[lang="zh-CN"] h2,
+        html[lang="zh-CN"] h3,
+        html[lang="zh-CN"] h4,
+        html[lang="zh-CN"] h5,
+        html[lang="zh-CN"] h6,
+        html[lang="zh-CN"] .font-alt {
+            font-family: "Noto Serif SC", "Newsreader", "Songti SC", serif;
+        }
+
+        /* ===== 打印 / 导出 PDF 样式 ===== */
+        @media print {
+            @page { margin: 14mm; }
+            /* 隐藏导航、按钮、顶部大图、头像和页脚 */
+            #mainNav,
+            .top-section,
+            #avatar,
+            footer,
+            #lang-toggle,
+            #print-btn {
+                display: none !important;
+            }
+            /* 去掉渐变/深色背景，统一白底黑字，节省墨水 */
+            body {
+                background: #fff !important;
+                color: #000 !important;
+                padding-top: 0 !important;
+            }
+            section {
+                background: #fff !important;
+                margin: 0 !important;
+                padding-top: 0.4rem !important;
+                padding-bottom: 0.4rem !important;
+            }
+            section, .main-body, p, li, code,
+            h1, h2, h3, h4, h5, h6, a, span, td, th {
+                color: #000 !important;
+            }
+            a { text-decoration: none !important; }
+            .container { max-width: 100% !important; width: 100% !important; }
+            /* 标题和条目尽量不被分页截断 */
+            h1, h2, h3, h4, h5, h6 { page-break-after: avoid; }
+            .main-body > * { page-break-inside: avoid; }
+        }
+    </style>
 
     <!-- Bootstrap core JS-->
     <script type="text/javascript" src="static/js/bootstrap.bundle.min.js"></script>
@@ -73,6 +157,9 @@
     <script type="text/javascript" src="static/js/scripts.js"></script>
     <script type="text/javascript" src="static/js/js-yaml.min.js"></script>
 
+    <!-- Bilingual (EN / 中文) loader & toggle -->
+    <script type="text/javascript" src="static/js/i18n.js"></script>
+
 </head>
 
 <body id="page-top">
@@ -89,16 +176,23 @@
             <div class="collapse navbar-collapse" id="navbarResponsive">
                 <ul class="navbar-nav ms-auto me-4 my-3 my-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link me-lg-3" href="#home">HOME</a>
+                        <a id="nav-home" class="nav-link me-lg-3" href="#home">HOME</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link me-lg-3" href="#awards">AWARDS</a>
+                        <a id="nav-awards" class="nav-link me-lg-3" href="#awards">AWARDS</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link me-lg-3" href="#experience">EXPERIENCE</a>
+                        <a id="nav-experience" class="nav-link me-lg-3" href="#experience">EXPERIENCE</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link me-lg-3" href="#publications">PUBLICATIONS</a>
+                        <a id="nav-publications" class="nav-link me-lg-3" href="#publications">PUBLICATIONS</a>
+                    </li>
+                    <li class="nav-item d-flex align-items-center">
+                        <a id="print-btn" class="nav-link" href="#" role="button"
+                           onclick="window.print(); return false;" aria-label="Print resume">Print</a>
+                    </li>
+                    <li class="nav-item d-flex align-items-center">
+                        <a id="lang-toggle" class="nav-link" href="#" role="button" aria-label="Switch language">中文</a>
                     </li>
                 </ul>
             </div>
@@ -175,6 +269,19 @@
         </div>
     </section>
     <!-- Skills  -->
+    <!-- Projects -->
+    <section class="bg-gradient-primary-to-secondary-gray mt5 md5" id="projects">
+        <div class="container px-5">
+            <header>
+                <h2 id="projects-subtitle"><i class="bi bi-file-text-fill"></i>&nbsp;PROJECTS</h2>
+            </header>
+            <div class="main-body" id="Projects">
+                <a class="navbar-brand fw-bold" href="map.html">🗺️ My Travel Map</a>
+            </div>
+
+        </div>
+    </section>
+    <!-- Projects  -->
     <!-- Footer-->
     <footer class="bg-bottom text-center py-5">
         <div class="container px-5">
