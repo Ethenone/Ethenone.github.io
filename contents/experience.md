@@ -46,7 +46,17 @@ Awarded in the Graduation Project Exhibition Competition (9/90)
 
 ### **Cancer detection based on deep learning methods using fragment-level methylation patterns**
 
-**September 2025 – Present | Supervisor: Dr. Yani Kang (SJTU)**
+**June 2026 – Present | Supervisor: Dr. Yani Kang (SJTU)**
+
+---
+
+### **RRBS-seq of Single-cell Clones Reveals Strictly Preserved Methylated or Unmethylated CpG Sites in HumanChromosomes**
+
+**May 2026 - Present | Supervisor: Dr. Yani Kang (SJTU) & Prof. Zhifeng Shao (SJTU)**
+
+- Developed a model based on the Markov model and likelihood estimation to distinguish genuine high-fidelity sites from non-high-fidelity sites.
+
+- Manuscript in preparation.
 
 ---
 
@@ -59,7 +69,5 @@ Awarded in the Graduation Project Exhibition Competition (9/90)
 ### **Work Experience**
 
 **Teaching assistant, course Participation in Research Program (2025.9-Present), course Internship and Innovation of Science and Technology I (2026.3-2026.6)**
-
-
 
 

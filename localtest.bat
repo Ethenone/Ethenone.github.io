@@ -8,6 +8,6 @@ start cmd /c "python -m http.server 8000"
 timeout /t 1 >nul
 
 :: 自动打开网页
-start "" "http://localhost:8000/map.html"
+start "" "http://localhost:8000/index.html"
 
 echo Server started. Browser opened!
