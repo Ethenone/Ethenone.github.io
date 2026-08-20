@@ -60,7 +60,7 @@ Awarded in the Graduation Project Exhibition Competition (9/90)
 
 ---
 
-### **Research on cancer cells variation when preserving in vitro**
+### **Research on cancer cells' transcriptome shift when preserving in vitro**
 
 **September 2025 – Present | Supervisor: Dr. Yani Kang (SJTU) & Prof. Zhifeng Shao (SJTU)**
 
@@ -68,6 +68,14 @@ Awarded in the Graduation Project Exhibition Competition (9/90)
 
 ### **Work Experience**
 
-**Teaching assistant, course Participation in Research Program (2025.9-Present), course Internship and Innovation of Science and Technology I (2026.3-2026.6)**
+**Teaching assistant**, 
 
+course IP012: Participation in Research Program, SJTU (2025.9-Present); 
 
+course BME3201: Internship and Innovation of Science and Technology I, SJTU (2026.3-2026.6); 
+
+course Research Project of Biology, High School Affiliated To Shanghai Jiao Tong University, MinHang Branch (2026.7).
+
+**Professional Internship**, 
+
+Shanghai Sixth People’s Hospital Affiliated to Shanghai Jiaotong University, Shanghai (2023.6-2023.8).
