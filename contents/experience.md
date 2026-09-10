@@ -1,6 +1,6 @@
 ### **Cell Segmentation and Quantitative Analysis for Immunohistochemical Staining Pathological Images**
 
-**September 2023 – March 2024 | Supervisor: Prof. Lichi Zhang (SJTU)**  
+**Sept. 2023 – Mar. 2024 | Supervisor: Prof. Lichi Zhang (SJTU)**  
 
 Participant in China International College Students' Innovation Competition 2024
 
@@ -14,7 +14,7 @@ Participant in China International College Students' Innovation Competition 2024
 
 ### **Screening and Analysis of Lung Tissue Cell-Specific DNA Methylation Biomarkers**
 
-**March 2024 – June 2024 | Supervisor: Dr. Yani Kang (SJTU)**
+**Mar. 2024 – Jun. 2024 | Supervisor: Dr. Yani Kang (SJTU)**
 
 Third prize in the Tsien Hsue-shen Cup Science and Technology Innovation Competition
 
@@ -26,7 +26,7 @@ Third prize in the Tsien Hsue-shen Cup Science and Technology Innovation Competi
 
 ### **Study on Methylation-based Diagnostic Biomarkers in cfDNA of Patients with Head and Neck Tumors**
 
-**September 2024 – June 2025 |  Supervisor: Dr. Yani Kang (SJTU)**
+**Sept. 2024 – Jun. 2025 |  Supervisor: Dr. Yani Kang (SJTU)**
 
 Awarded in the Graduation Project Exhibition Competition (9/90)
 
@@ -46,7 +46,7 @@ Awarded in the Graduation Project Exhibition Competition (9/90)
 
 ### **Cancer detection based on deep learning methods using fragment-level methylation patterns**
 
-**June 2026 – Present | Supervisor: Dr. Yani Kang (SJTU)**
+**Jun. 2026 – Present | Supervisor: Dr. Yani Kang (SJTU)**
 
 ---
 
@@ -62,7 +62,7 @@ Awarded in the Graduation Project Exhibition Competition (9/90)
 
 ### **Research on cancer cells' transcriptome shift when preserving in vitro**
 
-**September 2025 – Present | Supervisor: Dr. Yani Kang (SJTU) & Prof. Zhifeng Shao (SJTU)**
+**Sept. 2025 – Present | Supervisor: Dr. Yani Kang (SJTU) & Prof. Zhifeng Shao (SJTU)**
 
 * * *
 
@@ -70,12 +70,14 @@ Awarded in the Graduation Project Exhibition Competition (9/90)
 
 **Teaching assistant**, 
 
-course IP012: Participation in Research Program, SJTU (2025.9-Present); 
+course IP012: Participation in Research Program, SJTU (Sept. 2025 - Present); 
 
-course BME3201: Internship and Innovation of Science and Technology I, SJTU (2026.3-2026.6); 
+course BME3201: Internship and Innovation of Science and Technology I, SJTU (Mar. 2026 - Jun. 2026); 
 
-course Research Project of Biology, High School Affiliated To Shanghai Jiao Tong University, MinHang Branch (2026.7).
+course Research Project of Biology, High School Affiliated To Shanghai Jiao Tong University, MinHang Branch (Jul. 2026).
 
 **Professional Internship**, 
 
-Shanghai Sixth People’s Hospital Affiliated to Shanghai Jiaotong University, Shanghai (2023.6-2023.8).
+Shanghai Sixth People’s Hospital Affiliated to Shanghai Jiaotong University, Shanghai (Jun. 2023 - Aug. 2023).
+
+

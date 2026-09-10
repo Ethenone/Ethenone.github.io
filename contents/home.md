@@ -18,3 +18,5 @@
 • Average Score: 88.7/100
 
 **Shanghai Jiao Tong University**, Shanghai, School of Biomedical Engineering, M. S. in Biology (2025.9 - 2027.6 expected)
+
+• GPA: 3.7/4.0
