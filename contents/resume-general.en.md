@@ -92,5 +92,5 @@ M.S. student in Biology at Shanghai Jiao Tong University, interested in AI4Bio, 
 - Second Prize, Scholarship for Outstanding Students, SJTU (2023).
 - COSCO Shipping Scholarship (Top 2% among 500+), SJTU (2022).
 - First Prize, Chinese Chemistry Olympiad, Guangdong preliminary round (2020).
-- Second Prize, Chinese Chemistry Olympiad, Guangdong preliminary round (2020).
+- Second Prize, Chinese Chemistry Olympiad, Guangdong preliminary round (2019).
 - Second Prize, National Olympiad in Informatics in Provinces, Guangdong (2016).
