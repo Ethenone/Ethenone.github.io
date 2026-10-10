@@ -48,11 +48,11 @@ M.S. student in Biology at Shanghai Jiao Tong University, interested in AI4Bio, 
 <h2 id="publications">Publications & Intellectual Property</h2>
 
 - Cell-Specific DNA Methylation Markers in Plasma cfDNA Reveal Diagnostic Potential for Head and Neck Cancer. *Journal of Cancer* 17(7), 1318–1330 (2026). [DOI: 10.7150/jca.133470](https://doi.org/10.7150/jca.133470). **First author**.
-- A cfDNA methylation marker, screening method and detection kit for the early detection of head and neck cancer. Chinese patent application **CN122060862A**, published May 2026. **Student first author**.
+- A cfDNA methylation marker, screening method and detection kit for the early detection of head and neck cancer. Chinese patent application **CN122060862A**, published May 2026. **First student inventor**.
 - RRBS-seq of Single-cell Clones Reveals Strictly Preserved Methylated or Unmethylated CpG Sites in Human Chromosomes. Co-first author. Manuscript in preparation.
 - Support-Adaptive Evidence Estimation for Partially Observed Binary Patterns in DNA Methylation Sequencing. First author. Under review.
 - Assessing the Role of AI Agents in DNA Methylation Analysis and Biomarker Discovery. *Preprints* 2026. First author
-- Sequential Conformal Calibration under Recursive Selection. Other author. Under review.
+- Sequential Conformal Calibration under Recursive Selection. Co-author. Under review.
 
 <h2 id="projects">Selected Project</h2>
 
@@ -65,7 +65,7 @@ M.S. student in Biology at Shanghai Jiao Tong University, interested in AI4Bio, 
 
 <h2 id="education">Education</h2>
 
-**Shanghai Jiao Tong University**, School of Biomedical Engineering — M.S. in Biology, Sep. 2025–Jun. 2027 (expected). GPA: 3.70/4.00.
+**Shanghai Jiao Tong University**, School of Biomedical Engineering — M.S. in Biology, Sep. 2025–Present. GPA: 3.70/4.00.
 
 **Shanghai Jiao Tong University**, School of Biomedical Engineering — B.E. in Biomedical Engineering, Sep. 2021–Jun. 2025. Average score: 88.7/100.
 

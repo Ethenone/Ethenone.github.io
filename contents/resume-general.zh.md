@@ -48,7 +48,7 @@
 <h2 id="publications">论文与知识产权</h2>
 
 - “Cell-Specific DNA Methylation Markers in Plasma cfDNA Reveal Diagnostic Potential for Head and Neck Cancer.” *Journal of Cancer* 17(7), 1318–1330 (2026). [DOI: 10.7150/jca.133470](https://doi.org/10.7150/jca.133470)。**第一作者**。
-- “一种用于头颈癌早期检测的 cfDNA 甲基化标志物、筛选方法及检测试剂盒”，中国发明专利申请 **CN122060862A**，2026年5月公开。**学生第一作者**。
+- “一种用于头颈癌早期检测的 cfDNA 甲基化标志物、筛选方法及检测试剂盒”，中国发明专利申请 **CN122060862A**，2026年5月公开。**学生第一发明人**。
 - “RRBS-seq of Single-cell Clones Reveals Strictly Preserved Methylated or Unmethylated CpG Sites in Human Chromosomes.” 共同第一作者，论文撰写中。
 - “Support-Adaptive Evidence Estimation for Partially Observed Binary Patterns in DNA Methylation Sequencing.” 第一作者，审稿中。
 - “Assessing the Role of AI Agents in DNA Methylation Analysis and Biomarker Discovery.” *Preprints*，2026年。第一作者。
@@ -65,7 +65,7 @@
 
 <h2 id="education">教育经历</h2>
 
-**上海交通大学**，生物医学工程学院，生物学理学硕士，2025年9月–2027年6月（预计）。GPA：3.70/4.00。
+**上海交通大学**，生物医学工程学院，生物学理学硕士，2025年9月–。GPA：3.70/4.00。
 
 **上海交通大学**，生物医学工程学院，生物医学工程工学学士，2021年9月–2025年6月。平均成绩：88.7/100。
 
