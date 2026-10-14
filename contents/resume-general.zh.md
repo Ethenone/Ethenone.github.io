@@ -49,10 +49,13 @@
 
 - “Cell-Specific DNA Methylation Markers in Plasma cfDNA Reveal Diagnostic Potential for Head and Neck Cancer.” *Journal of Cancer* 17(7), 1318–1330 (2026). [DOI: 10.7150/jca.133470](https://doi.org/10.7150/jca.133470)。**第一作者**。
 - “一种用于头颈癌早期检测的 cfDNA 甲基化标志物、筛选方法及检测试剂盒”，中国发明专利申请 **CN122060862A**，2026年5月公开。**学生第一发明人**。
-- “RRBS-seq of Single-cell Clones Reveals Strictly Preserved Methylated or Unmethylated CpG Sites in Human Chromosomes.” 共同第一作者，论文撰写中。
+- “Assessing the Role of AI Agents in DNA Methylation Analysis and Biomarker Discovery.” *Preprints* 2026. [DOI: 10.20944/preprints202610.0608](https://doi.org/10.20944/preprints202610.0608.v1)。第一作者。
+- “Sequential Conformal Calibration under Recursive Selection.” *Arxiv*, 2026. [DOI: 10.48550/arXiv.2610.12937](https://doi.org/10.48550/arXiv.2610.12937). 其他作者，审稿中。
 - “Support-Adaptive Evidence Estimation for Partially Observed Binary Patterns in DNA Methylation Sequencing.” 第一作者，审稿中。
-- “Assessing the Role of AI Agents in DNA Methylation Analysis and Biomarker Discovery.” *Preprints*，2026年。第一作者。
-- “Sequential Conformal Calibration under Recursive Selection.” 其他作者，审稿中。
+- “RRBS-seq of Single-cell Clones Reveals Strictly Preserved Methylated or Unmethylated CpG Sites in Human Chromosomes.” 共同第一作者，论文撰写中。
+
+
+
 
 <h2 id="projects">项目</h2>
 
@@ -60,8 +63,8 @@
 
 <p class="meta">个人项目 · JavaScript、网页地图与数据可视化</p>
 
-- 开发交互式应用，整理并展示航空、铁路、公路、骑行及城市出行记录。
-- 实现路线地图、地理热力图、距离和时间统计、站点分布与交通网络视图。[演示](https://ethenone.github.io/Travel-map/)。
+- 设计记录航空、铁路和公路行程的交互式网页应用，展示路线地图和地理覆盖统计。
+- 使用 pandas、GeoPandas、Shapely 和 pyogrio 构建 Python 数据流程；使用 JavaScript、MapLibre GL JS 和 ECharts 实现地图与仪表盘。[演示](https://ethenone.github.io/Travel-map/)。
 
 <h2 id="education">教育经历</h2>
 

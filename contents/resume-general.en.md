@@ -49,10 +49,12 @@ M.S. student in Biology at Shanghai Jiao Tong University, interested in AI4Bio, 
 
 - Cell-Specific DNA Methylation Markers in Plasma cfDNA Reveal Diagnostic Potential for Head and Neck Cancer. *Journal of Cancer* 17(7), 1318–1330 (2026). [DOI: 10.7150/jca.133470](https://doi.org/10.7150/jca.133470). **First author**.
 - A cfDNA methylation marker, screening method and detection kit for the early detection of head and neck cancer. Chinese patent application **CN122060862A**, published May 2026. **First student inventor**.
-- RRBS-seq of Single-cell Clones Reveals Strictly Preserved Methylated or Unmethylated CpG Sites in Human Chromosomes. Co-first author. Manuscript in preparation.
+- Assessing the Role of AI Agents in DNA Methylation Analysis and Biomarker Discovery. *Preprints*, 2026. [DOI: 10.20944/preprints202610.0608](https://doi.org/10.20944/preprints202610.0608.v1). First author.
+- Sequential Conformal Calibration under Recursive Selection. *Arxiv*, 2026. [DOI: 10.48550/arXiv.2610.12937](https://doi.org/10.48550/arXiv.2610.12937). Co-author. Under review.
 - Support-Adaptive Evidence Estimation for Partially Observed Binary Patterns in DNA Methylation Sequencing. First author. Under review.
-- Assessing the Role of AI Agents in DNA Methylation Analysis and Biomarker Discovery. *Preprints* 2026. First author
-- Sequential Conformal Calibration under Recursive Selection. Co-author. Under review.
+- RRBS-seq of Single-cell Clones Reveals Strictly Preserved Methylated or Unmethylated CpG Sites in Human Chromosomes. Co-first author. Manuscript in preparation.
+
+
 
 <h2 id="projects">Selected Project</h2>
 
@@ -60,8 +62,8 @@ M.S. student in Biology at Shanghai Jiao Tong University, interested in AI4Bio, 
 
 <p class="meta">Independent project · JavaScript, web mapping, data visualization</p>
 
-- Built an interactive application for exploring personal transportation records across aviation, rail, road, cycling, and urban travel.
-- Implemented route maps, geographic heatmaps, distance and time summaries, station distributions, and transportation network views. [Demo](https://ethenone.github.io/Travel-map/).
+- Designed an interactive web application for air, rail, and road travel records, with route maps and geographic coverage statistics.
+- Built Python data pipelines with pandas, GeoPandas, Shapely, and pyogrio; implemented maps and dashboards using JavaScript, MapLibre GL JS, and ECharts. [Demo](https://ethenone.github.io/Travel-map/).
 
 <h2 id="education">Education</h2>
 
