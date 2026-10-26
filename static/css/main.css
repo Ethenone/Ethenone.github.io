@@ -33,5 +33,14 @@ a { color: var(--accent); }
   .resume-content h2 { margin-top: 1.2rem; scroll-margin-top: 0; }
   .resume-content h2, .resume-content h3 { break-after: avoid; }
   .resume-content li { break-inside: avoid; }
-  a { color: inherit; text-decoration: none; }
+  .resume-content a { color: inherit; text-decoration: underline; text-underline-offset: 2px; overflow-wrap: anywhere; }
+  .resume-content a[href^="https://"]::after,
+  .resume-content a[href^="http://"]::after {
+    content: " (" attr(href) ")";
+    color: #555;
+    font-size: .85em;
+    font-weight: 400;
+    overflow-wrap: anywhere;
+    word-break: break-all;
+  }
 }
